@@ -151,7 +151,7 @@
             }
         }
 
-        /* Form Content Area */
+        /* Form Content Area: Use Flexbox to separate header/inputs from footer */
         .n8n-chat-widget .form-content-area {
             flex: 1 1 55%;
             padding: 40px;
@@ -160,10 +160,17 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Ensures footer sticks to bottom */
-            height: 100%; /* Important for internal flex layout */
+            justify-content: space-between; 
+            height: 100%; 
         }
 
+        /* Wrapper for scrolling content */
+        .n8n-chat-widget .form-scroll-content {
+            overflow-y: auto; /* Allows only the form fields to scroll if needed */
+            padding-right: 15px; /* Space for scrollbar */
+            margin-right: -15px; /* Compensate for right padding */
+        }
+        
         /* Close Button (Top Right of Form) */
         .n8n-chat-widget .close-button {
             position: absolute;
@@ -182,7 +189,7 @@
 
         /* Header Text Styling */
         .n8n-chat-widget .welcome-text {
-            font-size: 18px; /* Slightly reduced font size */
+            font-size: 18px; 
             font-weight: 500;
             color: var(--chat--color-font);
             margin-bottom: 24px;
@@ -196,7 +203,7 @@
         
         /* Input Field Styling */
         .n8n-chat-widget .input-group {
-            margin-bottom: 15px; /* Slightly reduced vertical spacing */
+            margin-bottom: 15px; 
             position: relative;
         }
 
@@ -249,19 +256,18 @@
             flex: 1;
         }
         
-        /* Checkbox and Terms - FIXED LINE BREAKS */
+        /* Checkbox and Terms */
         .n8n-chat-widget .terms-checkbox-group {
             display: flex;
             align-items: flex-start;
-            margin-top: 10px; /* Added margin to separate from input */
-            margin-bottom: 25px;
+            margin-top: 10px; 
+            margin-bottom: 15px; /* Reduced for better fit */
             font-size: 13px; 
-            line-height: 1.2; /* Tightened line height */
+            line-height: 1.2; 
             color: var(--chat--color-font); 
         }
         .n8n-chat-widget .terms-checkbox-group label {
              padding-top: 2px;
-             /* Ensure label text can wrap naturally */
              flex: 1; 
         }
 
@@ -281,7 +287,8 @@
             text-decoration: none;
             font-weight: 600;
             transition: opacity 0.2s;
-            white-space: nowrap; /* Prevent breaking the link text */
+            /* Allow wrapping of link text if necessary on very small screens, 
+               but rely on the reduced font size to make it fit */
         }
         .n8n-chat-widget .terms-checkbox-group a:hover {
             opacity: 0.8;
@@ -304,6 +311,7 @@
             font-weight: 600;
             transition: background 0.3s ease, transform 0.1s ease;
             font-family: inherit;
+            margin-top: auto; /* Pushes button away from scrolling content */
             margin-bottom: 10px; /* Space above footer */
         }
 
@@ -317,15 +325,16 @@
             cursor: not-allowed;
         }
 
-        /* Footer Styling - FIXED TRUNCATION */
+        /* Footer Styling */
         .n8n-chat-widget .chat-footer {
-            padding: 10px 0; /* Reduced vertical padding */
+            padding: 10px 0 0; 
             text-align: center;
             background: white;
             border-top: 1px solid #f0f0f0;
-            font-size: 11px; /* Significantly reduced font size for copyright/powered-by */
-            white-space: normal; /* Allow text to wrap naturally */
+            font-size: 11px; 
+            white-space: normal; 
             line-height: 1.2;
+            padding-top: 10px;
         }
         .n8n-chat-widget .chat-footer a {
             color: var(--chat--color-secondary);
@@ -419,187 +428,60 @@
     // Welcome text with agent name substitution
     const welcomeText = config.branding.welcomeText.replace('[Agent Name]', config.branding.name);
     
-    formContentArea.innerHTML = `
-        <button class="close-button" title="Close">×</button>
-        <div class="form-scroll-content">
-            <p class="welcome-text">${welcomeText}</p>
+    // Create Scrollable Content Wrapper
+    const formScrollContent = document.createElement('div');
+    formScrollContent.className = 'form-scroll-content';
 
-            <div class="input-group">
-                <input type="text" id="nombre" class="form-input" placeholder="Name" required />
-            </div>
-            
-            <div class="input-group">
-                <input type="text" id="apellido" class="form-input" placeholder="LastName" required />
-            </div>
-            
-            <div class="input-group phone-input-group">
-                <select id="country-code" class="country-code-select"></select>
-                <input type="tel" id="telefono" class="form-input phone-number-input" placeholder="Phone" required />
-            </div>
-            
-            <div class="input-group">
-                <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" />
-            </div>
+    formScrollContent.innerHTML = `
+        <p class="welcome-text">${welcomeText}</p>
 
-            <div class="terms-checkbox-group">
-                <input type="checkbox" id="terms-accepted" required />
-                <label for="terms-accepted">
-                    I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
-                </label>
-            </div>
-            
-            <button class="whatsapp-btn" type="button" disabled>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
-                    <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
-                </svg>
-                Start Conversation
-            </button>
-            <div class="error-message" id="form-error"></div>
+        <div class="input-group">
+            <input type="text" id="nombre" class="form-input" placeholder="Name" required />
+        </div>
+        
+        <div class="input-group">
+            <input type="text" id="apellido" class="form-input" placeholder="LastName" required />
+        </div>
+        
+        <div class="input-group phone-input-group">
+            <select id="country-code" class="country-code-select"></select>
+            <input type="tel" id="telefono" class="form-input phone-number-input" placeholder="Phone" required />
+        </div>
+        
+        <div class="input-group">
+            <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" />
+        </div>
+
+        <div class="terms-checkbox-group">
+            <input type="checkbox" id="terms-accepted" required />
+            <label for="terms-accepted">
+                I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
+            </label>
         </div>
     `;
 
-    chatContainer.appendChild(formContentArea);
-    chatOverlay.appendChild(chatContainer);
-    widgetContainer.appendChild(chatOverlay);
+    // Create Button and Error Message wrapper
+    const actionArea = document.createElement('div');
+    actionArea.innerHTML = `
+        <button class="whatsapp-btn" type="button" disabled>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
+            </svg>
+            Start Conversation
+        </button>
+        <div class="error-message" id="form-error"></div>
+    `;
 
-
-    // Footer (placed inside form content area)
+    // Create Close Button
+    const closeButton = document.createElement('button');
+    closeButton.className = 'close-button';
+    closeButton.title = 'Close';
+    closeButton.innerHTML = '×';
+    
+    // Footer (placed inside form content area to maintain centering/flex layout)
 	const footer = document.createElement('div');
 	footer.className = 'chat-footer';
 	footer.innerHTML = `
 		<a href="${config.branding.poweredBy.link}" target="_blank" rel="noopener noreferrer">
 			${config.branding.poweredBy.text}
 		</a>
-	`;
-    formContentArea.appendChild(footer);
-    
-    // Create chat toggle button 
-    const chatToggle = document.createElement('button');
-    chatToggle.className = `chat-toggle${config.style.position === 'left' ? ' position-left' : ''}`;
-    chatToggle.title = 'Chat With Us';
-    chatToggle.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-    `;
-    widgetContainer.appendChild(chatToggle);
-
-    // Append widget to body
-    document.body.appendChild(widgetContainer);
-
-    // --- Elements references ---
-    const openBtn = chatToggle;
-    const closeBtn = formContentArea.querySelector('.close-button');
-    const whatsappBtn = formContentArea.querySelector('.whatsapp-btn');
-    const termsCheckbox = formContentArea.querySelector('#terms-accepted');
-    const nameInput = formContentArea.querySelector('#nombre');
-    const lastNameInput = formContentArea.querySelector('#apellido');
-    const phoneInput = formContentArea.querySelector('#telefono');
-    const emailInput = formContentArea.querySelector('#correo-corporativo');
-    const countryCodeSelect = formContentArea.querySelector('#country-code');
-    const errorEl = formContentArea.querySelector('#form-error');
-
-    // --- Initialization and Utility ---
-    
-    // Populate Country Code Dropdown
-    countryCodes.forEach(country => {
-        const option = document.createElement('option');
-        option.value = country.dial_code;
-        option.textContent = country.dial_code;
-        if (country.dial_code === defaultCountryCode.dial_code) {
-             option.selected = true;
-        }
-        countryCodeSelect.appendChild(option);
-    });
-    
-    // --- Handlers ---
-    
-    function showModal() {
-        chatOverlay.classList.add('open');
-        chatContainer.classList.add('open');
-        openBtn.style.display = 'none';
-        errorEl.style.display = 'none';
-    }
-
-    function closeModal() {
-        chatOverlay.classList.remove('open');
-        chatContainer.classList.remove('open');
-        openBtn.style.display = 'flex';
-    }
-
-    function updateButtonState() {
-        // Validation logic
-        const isNameValid = nameInput.value.trim().length > 0;
-        const isPhoneValid = phoneInput.value.trim().length >= 5; 
-        const isTermsChecked = termsCheckbox.checked;
-        
-        if (isNameValid && isPhoneValid && isTermsChecked) {
-            whatsappBtn.removeAttribute('disabled');
-        } else {
-            whatsappBtn.setAttribute('disabled', 'true');
-        }
-    }
-
-    async function handleWhatsAppStart(e) {
-        e.preventDefault();
-        
-        const name = nameInput.value.trim();
-        const lastName = lastNameInput.value.trim();
-        const phone = phoneInput.value.trim();
-        const email = emailInput.value.trim();
-        const countryCode = countryCodeSelect.value;
-        const fullPhoneNumber = countryCode + phone;
-        
-        if (!termsCheckbox.checked) {
-            errorEl.textContent = "You need to accept Our Privacy Policy and Our Terms and Conditions.";
-            errorEl.style.display = 'block';
-            return;
-        }
-        
-        // 1. Send data to n8n backend for lead logging
-        // We use the URL provided in the WordPress config (config.whatsapp.n8nBackendUrl)
-        try {
-            await fetch(config.whatsapp.n8nBackendUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    firstName: name,
-                    lastName: lastName,
-                    phone: fullPhoneNumber,
-                    email: email,
-                    source: 'Website Chat Form'
-                })
-            });
-            // We ignore errors here so the user can still start the chat if the backend logging fails
-        } catch (err) {
-            console.error('Error logging lead to n8n:', err);
-        }
-        
-        // 2. Redirect to WhatsApp
-        // We use the WhatsApp number provided in the WordPress config (config.whatsapp.phoneNumber)
-        const whatsappUrl = `https://wa.me/${config.whatsapp.phoneNumber.replace('+', '')}?text=${encodeURIComponent(config.whatsapp.prefilledMessage + ' - ' + name + ' ' + lastName + ' (' + fullPhoneNumber + ')')}`;
-        
-        // Open in a new tab/window
-        window.open(whatsappUrl, '_blank');
-        
-        // Close the modal after redirection
-        closeModal();
-    }
-
-
-    // --- Event listeners ---
-    openBtn.addEventListener('click', showModal);
-    closeBtn.addEventListener('click', closeModal);
-    whatsappBtn.addEventListener('click', handleWhatsAppStart);
-
-    // Input listeners to enable/disable button
-    [nameInput, phoneInput, termsCheckbox].forEach(el => {
-        el.addEventListener('input', updateButtonState);
-    });
-
-    // Start with modal closed and toggle button visible
-    openBtn.style.display = 'flex';
-    chatContainer.classList.remove('open');
-    chatOverlay.classList.remove('open');
-
-})();
