@@ -5,7 +5,7 @@
     const defaultConfig = {
         whatsapp: {
             phoneNumber: '+61412345678',
-            prefilledMessage: 'Hi👋, This is Sarah, thank you for contacting Bridgeware Technologies. How can we help you today?',
+            prefilledMessage: 'Hi👋, This is Sarah, thank thank you for contacting Bridgeware Technologies. How can we help you today?',
             n8nBackendUrl: 'https://myExample-n8n-instance/webhook/whatsapp-lead',
         },
         branding: {
@@ -64,14 +64,14 @@
     // Default selected code (e.g., Australia or the first one)
     const defaultCountryCode = countryCodes.find(c => c.code === 'AU') || countryCodes[0]; 
 
-    // --- Custom Styles for Form/Modal View (FIXED LAYOUT AND COLORS) ---
+    // --- Custom Styles for Form/Modal View (FINAL FIXES) ---
     const styles = `
         .n8n-chat-widget {
             --chat--color-primary: var(--n8n-chat-primary-color, ${config.style.primaryColor}); 
             --chat--color-secondary: var(--n8n-chat-secondary-color, ${config.style.secondaryColor}); 
             --chat--color-background: var(--n8n-chat-background-color, #f4f6f8);
             --chat--color-font: var(--n8n-chat-font-color, #333333);
-            /* NEW: Colors derived from the visual design in the image */
+            /* Input colors */
             --chat--color-input-bg: #1c274b;
             --chat--color-input-font: #ffffff;
             font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -160,7 +160,8 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between; /* Ensures footer sticks to bottom */
+            height: 100%; /* Important for internal flex layout */
         }
 
         /* Close Button (Top Right of Form) */
@@ -176,18 +177,18 @@
             padding: 5px;
             font-size: 24px;
             opacity: 0.6;
-            z-index: 10; /* Ensure button is above form elements */
+            z-index: 10; 
         }
 
         /* Header Text Styling */
         .n8n-chat-widget .welcome-text {
-            font-size: 20px;
+            font-size: 18px; /* Slightly reduced font size */
             font-weight: 500;
             color: var(--chat--color-font);
             margin-bottom: 24px;
             line-height: 1.4;
             text-align: left;
-            margin-right: 30px; /* Added to give space for the close button */
+            margin-right: 30px; /* Space for the close button */
         }
         .n8n-chat-widget .welcome-text strong {
             font-weight: 700;
@@ -195,24 +196,24 @@
         
         /* Input Field Styling */
         .n8n-chat-widget .input-group {
-            margin-bottom: 20px; /* Increased vertical spacing */
+            margin-bottom: 15px; /* Slightly reduced vertical spacing */
             position: relative;
         }
 
         .n8n-chat-widget .form-input {
             width: 100%;
-            padding: 15px 18px; /* Increased padding for better look */
+            padding: 15px 18px; 
             border: 1px solid var(--chat--color-input-bg);
-            border-radius: 8px; /* Slightly rounder corners */
+            border-radius: 8px; 
             font-size: 16px;
-            color: var(--chat--color-input-font); /* Input text is WHITE */
-            background: var(--chat--color-input-bg); /* Input background is DARK BLUE */
+            color: var(--chat--color-input-font); 
+            background: var(--chat--color-input-bg); 
             transition: border-color 0.2s, box-shadow 0.2s;
             box-sizing: border-box;
             font-family: inherit;
         }
         .n8n-chat-widget .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.7); /* Light placeholder text */
+            color: rgba(255, 255, 255, 0.7); 
             opacity: 1; 
         }
         .n8n-chat-widget .form-input:focus {
@@ -224,17 +225,16 @@
         /* Phone Input Group */
         .n8n-chat-widget .phone-input-group {
             display: flex;
-            gap: 10px; /* Increased gap */
+            gap: 10px; 
         }
         .n8n-chat-widget .country-code-select {
-            flex: 0 0 90px; /* Fixed width for the code */
-            padding: 15px 5px; /* Match padding to input height */
+            flex: 0 0 90px; 
+            padding: 15px 5px; 
             border: 1px solid var(--chat--color-input-bg);
             border-radius: 8px;
             font-size: 16px;
-            color: var(--chat--color-input-font); /* Select text must be white */
-            background: var(--chat--color-input-bg); /* Select background must be dark */
-            /* Custom dropdown arrow - now white */
+            color: var(--chat--color-input-font); 
+            background: var(--chat--color-input-bg); 
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2064.9c-2.8-2.8-6.9-4.7-11.9-5.1H17.3c-5%200.4-9.1%202.3-11.9%205.1-5.7%205.7-5.7%2014.9%200%2020.6l130.6%20130.6c2.8%202.8%206.9%204.7%2011.9%205.1%205-0.4%209.1-2.3%2011.9-5.1L287%2085.5c5.7-5.7%205.7-14.9%200-20.6z%22%2F%3E%3C%2Fsvg%3E"); 
             background-repeat: no-repeat;
             background-position: right 8px center;
@@ -249,17 +249,20 @@
             flex: 1;
         }
         
-        /* Checkbox and Terms - FIXED TRUNCATION */
+        /* Checkbox and Terms - FIXED LINE BREAKS */
         .n8n-chat-widget .terms-checkbox-group {
             display: flex;
             align-items: flex-start;
+            margin-top: 10px; /* Added margin to separate from input */
             margin-bottom: 25px;
-            font-size: 13px; /* Smaller font size for legal text */
-            line-height: 1.4;
-            color: var(--chat--color-font); /* Ensure text color is set */
+            font-size: 13px; 
+            line-height: 1.2; /* Tightened line height */
+            color: var(--chat--color-font); 
         }
         .n8n-chat-widget .terms-checkbox-group label {
              padding-top: 2px;
+             /* Ensure label text can wrap naturally */
+             flex: 1; 
         }
 
         .n8n-chat-widget .terms-checkbox-group input[type="checkbox"] {
@@ -270,7 +273,7 @@
             border-radius: 3px;
             border: 1px solid #ccc;
             cursor: pointer;
-            flex-shrink: 0; /* Prevents checkbox from shrinking on small screens */
+            flex-shrink: 0; 
         }
 
         .n8n-chat-widget .terms-checkbox-group a {
@@ -278,6 +281,7 @@
             text-decoration: none;
             font-weight: 600;
             transition: opacity 0.2s;
+            white-space: nowrap; /* Prevent breaking the link text */
         }
         .n8n-chat-widget .terms-checkbox-group a:hover {
             opacity: 0.8;
@@ -300,6 +304,7 @@
             font-weight: 600;
             transition: background 0.3s ease, transform 0.1s ease;
             font-family: inherit;
+            margin-bottom: 10px; /* Space above footer */
         }
 
         .n8n-chat-widget .whatsapp-btn:hover {
@@ -307,17 +312,25 @@
         }
         
         .n8n-chat-widget .whatsapp-btn:disabled {
-            background: #dcdcdc; /* Light gray for disabled state */
-            color: #888888; /* Dark gray text */
+            background: #dcdcdc; 
+            color: #888888; 
             cursor: not-allowed;
         }
 
-        /* Footer Styling */
+        /* Footer Styling - FIXED TRUNCATION */
         .n8n-chat-widget .chat-footer {
-            padding: 15px 40px 0; /* Adjusted padding */
+            padding: 10px 0; /* Reduced vertical padding */
             text-align: center;
             background: white;
-            margin-top: auto; /* Push footer to the bottom */
+            border-top: 1px solid #f0f0f0;
+            font-size: 11px; /* Significantly reduced font size for copyright/powered-by */
+            white-space: normal; /* Allow text to wrap naturally */
+            line-height: 1.2;
+        }
+        .n8n-chat-widget .chat-footer a {
+            color: var(--chat--color-secondary);
+            text-decoration: none;
+            font-weight: 500;
         }
         
         .n8n-chat-widget .error-message {
@@ -403,44 +416,46 @@
     const formContentArea = document.createElement('div');
     formContentArea.className = 'form-content-area';
     
-    // Welcome text with agent name substitution (FIXED BRACKETS)
+    // Welcome text with agent name substitution
     const welcomeText = config.branding.welcomeText.replace('[Agent Name]', config.branding.name);
     
     formContentArea.innerHTML = `
         <button class="close-button" title="Close">×</button>
-        <p class="welcome-text">${welcomeText}</p>
+        <div class="form-scroll-content">
+            <p class="welcome-text">${welcomeText}</p>
 
-        <div class="input-group">
-            <input type="text" id="nombre" class="form-input" placeholder="Name" required />
-        </div>
-        
-        <div class="input-group">
-            <input type="text" id="apellido" class="form-input" placeholder="LastName" required />
-        </div>
-        
-        <div class="input-group phone-input-group">
-            <select id="country-code" class="country-code-select"></select>
-            <input type="tel" id="telefono" class="form-input phone-number-input" placeholder="Phone" required />
-        </div>
-        
-        <div class="input-group">
-            <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" />
-        </div>
+            <div class="input-group">
+                <input type="text" id="nombre" class="form-input" placeholder="Name" required />
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="apellido" class="form-input" placeholder="LastName" required />
+            </div>
+            
+            <div class="input-group phone-input-group">
+                <select id="country-code" class="country-code-select"></select>
+                <input type="tel" id="telefono" class="form-input phone-number-input" placeholder="Phone" required />
+            </div>
+            
+            <div class="input-group">
+                <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" />
+            </div>
 
-        <div class="terms-checkbox-group">
-            <input type="checkbox" id="terms-accepted" required />
-            <label for="terms-accepted">
-                I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
-            </label>
+            <div class="terms-checkbox-group">
+                <input type="checkbox" id="terms-accepted" required />
+                <label for="terms-accepted">
+                    I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
+                </label>
+            </div>
+            
+            <button class="whatsapp-btn" type="button" disabled>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
+                </svg>
+                Start Conversation
+            </button>
+            <div class="error-message" id="form-error"></div>
         </div>
-        
-        <button class="whatsapp-btn" type="button" disabled>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
-                <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
-            </svg>
-            Start Conversation
-        </button>
-        <div class="error-message" id="form-error"></div>
     `;
 
     chatContainer.appendChild(formContentArea);
@@ -448,7 +463,7 @@
     widgetContainer.appendChild(chatOverlay);
 
 
-    // Footer (placed inside form content area to maintain centering/flex layout)
+    // Footer (placed inside form content area)
 	const footer = document.createElement('div');
 	footer.className = 'chat-footer';
 	footer.innerHTML = `
