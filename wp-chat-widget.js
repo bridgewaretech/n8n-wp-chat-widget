@@ -4,8 +4,8 @@
     // but the intention is for the WordPress config to supply the actual values.
     const defaultConfig = {
         whatsapp: {
-            phoneNumber: '+61491788774',
-            prefilledMessage: 'Hi👋, This is Bridgy, thank you for contacting Bridgeware Technologies. How can we help you today?',
+            phoneNumber: '+61412345678',
+            prefilledMessage: 'Hi👋, This is Sarah, thank you for contacting Bridgeware Technologies. How can we help you today?',
             n8nBackendUrl: 'https://myExample-n8n-instance/webhook/whatsapp-lead',
         },
         branding: {
@@ -64,14 +64,16 @@
     // Default selected code (e.g., Australia or the first one)
     const defaultCountryCode = countryCodes.find(c => c.code === 'AU') || countryCodes[0]; 
 
-
-    // --- Custom Styles for Form/Modal View ---
+    // --- Custom Styles for Form/Modal View (FIXED LAYOUT AND COLORS) ---
     const styles = `
         .n8n-chat-widget {
             --chat--color-primary: var(--n8n-chat-primary-color, ${config.style.primaryColor}); 
             --chat--color-secondary: var(--n8n-chat-secondary-color, ${config.style.secondaryColor}); 
             --chat--color-background: var(--n8n-chat-background-color, #f4f6f8);
             --chat--color-font: var(--n8n-chat-font-color, #333333);
+            /* NEW: Colors derived from the visual design in the image */
+            --chat--color-input-bg: #1c274b;
+            --chat--color-input-font: #ffffff;
             font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
 
@@ -185,6 +187,7 @@
             margin-bottom: 24px;
             line-height: 1.4;
             text-align: left;
+            margin-right: 30px; /* Added to give space for the close button */
         }
         .n8n-chat-widget .welcome-text strong {
             font-weight: 700;
@@ -192,20 +195,25 @@
         
         /* Input Field Styling */
         .n8n-chat-widget .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px; /* Increased vertical spacing */
             position: relative;
         }
 
         .n8n-chat-widget .form-input {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            padding: 15px 18px; /* Increased padding for better look */
+            border: 1px solid var(--chat--color-input-bg);
+            border-radius: 8px; /* Slightly rounder corners */
             font-size: 16px;
-            color: var(--chat--color-font);
+            color: var(--chat--color-input-font); /* Input text is WHITE */
+            background: var(--chat--color-input-bg); /* Input background is DARK BLUE */
             transition: border-color 0.2s, box-shadow 0.2s;
             box-sizing: border-box;
             font-family: inherit;
+        }
+        .n8n-chat-widget .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Light placeholder text */
+            opacity: 1; 
         }
         .n8n-chat-widget .form-input:focus {
             outline: none;
@@ -216,17 +224,20 @@
         /* Phone Input Group */
         .n8n-chat-widget .phone-input-group {
             display: flex;
-            gap: 5px;
+            gap: 10px; /* Increased gap */
         }
         .n8n-chat-widget .country-code-select {
-            flex: 0 0 100px;
-            padding: 12px 5px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            flex: 0 0 90px; /* Fixed width for the code */
+            padding: 15px 5px; /* Match padding to input height */
+            border: 1px solid var(--chat--color-input-bg);
+            border-radius: 8px;
             font-size: 16px;
-            color: var(--chat--color-font);
-            /* Custom dropdown arrow for aesthetics */
-            background: white url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2064.9c-2.8-2.8-6.9-4.7-11.9-5.1H17.3c-5%200.4-9.1%202.3-11.9%205.1-5.7%205.7-5.7%2014.9%200%2020.6l130.6%20130.6c2.8%202.8%206.9%204.7%2011.9%205.1%205-0.4%209.1-2.3%2011.9-5.1L287%2085.5c5.7-5.7%205.7-14.9%200-20.6z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 8px center;
+            color: var(--chat--color-input-font); /* Select text must be white */
+            background: var(--chat--color-input-bg); /* Select background must be dark */
+            /* Custom dropdown arrow - now white */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2064.9c-2.8-2.8-6.9-4.7-11.9-5.1H17.3c-5%200.4-9.1%202.3-11.9%205.1-5.7%205.7-5.7%2014.9%200%2020.6l130.6%20130.6c2.8%202.8%206.9%204.7%2011.9%205.1%205-0.4%209.1-2.3%2011.9-5.1L287%2085.5c5.7-5.7%205.7-14.9%200-20.6z%22%2F%3E%3C%2Fsvg%3E"); 
+            background-repeat: no-repeat;
+            background-position: right 8px center;
             background-size: 10px;
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -238,12 +249,17 @@
             flex: 1;
         }
         
-        /* Checkbox and Terms */
+        /* Checkbox and Terms - FIXED TRUNCATION */
         .n8n-chat-widget .terms-checkbox-group {
             display: flex;
             align-items: flex-start;
             margin-bottom: 25px;
-            font-size: 14px;
+            font-size: 13px; /* Smaller font size for legal text */
+            line-height: 1.4;
+            color: var(--chat--color-font); /* Ensure text color is set */
+        }
+        .n8n-chat-widget .terms-checkbox-group label {
+             padding-top: 2px;
         }
 
         .n8n-chat-widget .terms-checkbox-group input[type="checkbox"] {
@@ -254,12 +270,13 @@
             border-radius: 3px;
             border: 1px solid #ccc;
             cursor: pointer;
+            flex-shrink: 0; /* Prevents checkbox from shrinking on small screens */
         }
 
         .n8n-chat-widget .terms-checkbox-group a {
             color: var(--chat--color-primary);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             transition: opacity 0.2s;
         }
         .n8n-chat-widget .terms-checkbox-group a:hover {
@@ -290,16 +307,17 @@
         }
         
         .n8n-chat-widget .whatsapp-btn:disabled {
-            background: #ccc;
+            background: #dcdcdc; /* Light gray for disabled state */
+            color: #888888; /* Dark gray text */
             cursor: not-allowed;
         }
 
         /* Footer Styling */
         .n8n-chat-widget .chat-footer {
-            padding: 8px 40px;
+            padding: 15px 40px 0; /* Adjusted padding */
             text-align: center;
             background: white;
-            border-top: 1px solid #f0f0f0;
+            margin-top: auto; /* Push footer to the bottom */
         }
         
         .n8n-chat-widget .error-message {
@@ -385,7 +403,7 @@
     const formContentArea = document.createElement('div');
     formContentArea.className = 'form-content-area';
     
-    // Welcome text with agent name substitution
+    // Welcome text with agent name substitution (FIXED BRACKETS)
     const welcomeText = config.branding.welcomeText.replace('[Agent Name]', config.branding.name);
     
     formContentArea.innerHTML = `
@@ -412,7 +430,7 @@
         <div class="terms-checkbox-group">
             <input type="checkbox" id="terms-accepted" required />
             <label for="terms-accepted">
-                I;ve read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a>
+                I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
             </label>
         </div>
         
@@ -497,7 +515,7 @@
     function updateButtonState() {
         // Validation logic
         const isNameValid = nameInput.value.trim().length > 0;
-        const isPhoneValid = phoneInput.value.trim().length >= 5; // Allow shorter numbers for input flexibility
+        const isPhoneValid = phoneInput.value.trim().length >= 5; 
         const isTermsChecked = termsCheckbox.checked;
         
         if (isNameValid && isPhoneValid && isTermsChecked) {
@@ -518,7 +536,7 @@
         const fullPhoneNumber = countryCode + phone;
         
         if (!termsCheckbox.checked) {
-            errorEl.textContent = 'You need to accept Our Privacy Policy and Our Terms and Conditions.';
+            errorEl.textContent = "You need to accept Our Privacy Policy and Our Terms and Conditions.";
             errorEl.style.display = 'block';
             return;
         }
