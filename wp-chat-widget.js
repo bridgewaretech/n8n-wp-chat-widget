@@ -115,7 +115,7 @@
         @media (min-width: 601px) {
             .n8n-chat-widget .chat-container {
                 width: 700px;
-                height: 600px; /* FIXED: Increased height to accommodate field spacing */
+                height: 600px; 
                 max-height: 90vh;
             }
         }
@@ -153,10 +153,10 @@
             }
         }
 
-        /* Form Content Area: height: 100% added to ensure flex pinning works */
+        /* Form Content Area: IMPORTANT - height: 100% added to ensure flex pinning works */
         .n8n-chat-widget .form-content-area {
             flex: 1 1 55%;
-            padding: 40px;
+            padding: 30px; /* FIXED: Reduced vertical padding from 40px to 30px to save space */
             background: white;
             border-radius: 12px;
             position: relative;
@@ -169,7 +169,7 @@
 
         /* Wrapper for scrolling content */
         .n8n-chat-widget .form-scroll-content {
-            overflow-y: hidden; /* FIXED: Prevents scrollbar from appearing */
+            overflow-y: hidden; /* Prevents scrollbar from appearing */
             margin-right: 0; 
             padding-right: 0;
             margin-bottom: 16px; 
@@ -208,7 +208,7 @@
         
         /* Input Field Spacing FIX */
         .n8n-chat-widget .input-group {
-            margin-bottom: 16px; /* Standardized vertical spacing between groups */
+            margin-bottom: 14px; /* FIXED: Reduced spacing between fields from 16px to 14px */
             position: relative;
         }
 
