@@ -166,9 +166,10 @@
         /* Wrapper for scrolling content */
         .n8n-chat-widget .form-scroll-content {
             overflow-y: auto; 
-            padding-right: 15px; 
-            margin-right: -15px; 
-            margin-bottom: 20px; 
+            padding-right: 15px; /* Ensures space for scrollbar */
+            margin-right: -15px; /* Compensates for padding-right, keeping content flush */
+            margin-bottom: 16px; /* Space between last input and action area */
+            padding-bottom: 5px; /* Small buffer at the bottom of the scroll */
         }
         
         /* Close Button (Top Right of Form) */
@@ -201,9 +202,9 @@
             font-weight: 700;
         }
         
-        /* Input Field Styling */
+        /* Input Field Spacing FIX */
         .n8n-chat-widget .input-group {
-            margin-bottom: 15px; 
+            margin-bottom: 16px; /* **FIX: Standardized vertical spacing between groups** */
             position: relative;
         }
 
@@ -256,12 +257,12 @@
             flex: 1;
         }
         
-        /* Checkbox and Terms */
+        /* Checkbox and Terms Spacing FIX */
         .n8n-chat-widget .terms-checkbox-group {
             display: flex;
             align-items: flex-start;
-            margin-top: 10px; 
-            margin-bottom: 15px; 
+            margin-top: 5px; /* Reduced top margin to keep it close to the form element above */
+            margin-bottom: 16px; /* **FIX: Standardized vertical spacing before the button** */
             font-size: 13px; 
             line-height: 1.2; 
             color: var(--chat--color-font); 
@@ -309,7 +310,7 @@
             font-weight: 600;
             transition: background 0.3s ease, transform 0.1s ease;
             font-family: inherit;
-            margin-top: 0; 
+            margin-top: 0; /* **FIX: Ensure no extra margin above the button from other elements** */
             margin-bottom: 10px; 
         }
 
@@ -362,10 +363,10 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: auto; /* Allow width to fit content */
-            padding: 12px 20px; /* Padding for text and icon */
-            height: 48px; /* Slightly smaller height for better pill look */
-            border-radius: 24px !important; /* **CRITICAL FIX: Force roundness on the ends** */
+            width: auto; 
+            padding: 12px 20px; 
+            height: 48px; 
+            border-radius: 24px !important; 
             background: #25D366; 
             color: white; 
             border: none;
@@ -376,10 +377,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px; /* Text size for 'Hi!' */
+            font-size: 16px; 
             font-weight: 600;
             text-decoration: none;
-            gap: 10px; /* Space between text and icon */
+            gap: 10px; 
         }
 
         .n8n-chat-widget .chat-toggle.position-left {
@@ -392,15 +393,8 @@
             background: #1da851; 
         }
         
-        /* When modal is open, shrink to just the icon */
-        .n8n-chat-widget .chat-toggle[style*="display: none"] {
-            /* This class is primarily hidden when the modal is open, 
-               but we keep the styling here for completeness if needed */
-        }
-
-
         .n8n-chat-widget .chat-toggle svg {
-            width: 24px; /* Slightly reduced icon size */
+            width: 24px; 
             height: 24px;
             fill: white !important; 
             flex-shrink: 0;
