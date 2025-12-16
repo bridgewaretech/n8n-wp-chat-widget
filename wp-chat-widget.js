@@ -167,6 +167,7 @@
             overflow-y: auto; /* Allows only the form fields to scroll if needed */
             padding-right: 15px; /* Space for scrollbar */
             margin-right: -15px; /* Compensate for right padding */
+            margin-bottom: 20px; /* Space before the action area */
         }
         
         /* Close Button (Top Right of Form) */
@@ -307,8 +308,13 @@
             font-weight: 600;
             transition: background 0.3s ease, transform 0.1s ease;
             font-family: inherit;
-            margin-top: auto; 
+            margin-top: 0; 
             margin-bottom: 10px; 
+        }
+        
+        /* Action Area Wrapper - Ensure it sits above the footer */
+        .n8n-chat-widget .action-area {
+            margin-top: auto; 
         }
 
         .n8n-chat-widget .whatsapp-btn:hover {
@@ -342,6 +348,7 @@
             color: red;
             font-size: 13px;
             margin-top: 10px;
+            margin-bottom: 10px; 
             text-align: center;
             display: none;
         }
@@ -451,13 +458,14 @@
         <div class="terms-checkbox-group">
             <input type="checkbox" id="terms-accepted" required />
             <label for="terms-accepted">
-                I have read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
+                I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
             </label>
         </div>
     `;
 
     // Create Button and Error Message wrapper (Action Area)
     const actionArea = document.createElement('div');
+    actionArea.className = 'action-area';
     actionArea.innerHTML = `
         <button class="whatsapp-btn" type="button" disabled>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
@@ -486,8 +494,8 @@
     // Assemble form content area
     formContentArea.appendChild(closeButton);
     formContentArea.appendChild(formScrollContent);
-    formContentArea.appendChild(actionArea);
-    formContentArea.appendChild(footer); 
+    formContentArea.appendChild(actionArea); 
+    formContentArea.appendChild(footer);     
     
     chatContainer.appendChild(formContentArea);
     chatOverlay.appendChild(chatContainer);
