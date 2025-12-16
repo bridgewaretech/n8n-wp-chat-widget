@@ -593,8 +593,10 @@
         const isLastNameValid = lastName.length > 0;
         const isTermsChecked = termsCheckbox.checked;
         
-        // 2. Check Phone Number: minimum 5 digits and ONLY digits
-        const isPhoneFormatValid = phone.length >= 5 && /^\d+$/.test(phone);
+        // 2. Check Phone Number: minimum 7 digits and ONLY digits (stricter E.164 compliance)
+        // If your phones require more digits (e.g., 9), increase this number!
+        const minPhoneLength = 7; 
+        const isPhoneFormatValid = phone.length >= minPhoneLength && /^\d+$/.test(phone); // L340
         
         // 3. Check Email: required and valid format
         const isEmailFormatValid = isEmailValid(email);
