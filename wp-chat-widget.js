@@ -292,7 +292,7 @@
             opacity: 0.8;
         }
         
-        /* Start Conversation Button */
+        /* Start Conversation Button (Modal Button) */
         .n8n-chat-widget .whatsapp-btn {
             display: flex;
             align-items: center;
@@ -300,8 +300,8 @@
             gap: 10px;
             width: 100%;
             padding: 15px 24px;
-            background: #f1f1f1; /* Changed to lighter gray background */
-            color: #888888; /* Changed to gray text color */
+            background: #f1f1f1; 
+            color: #888888; 
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -319,7 +319,6 @@
             color: white;
         }
         
-        /* Action Area Wrapper - Ensure it sits above the footer */
         .n8n-chat-widget .action-area {
             margin-top: auto; 
         }
@@ -329,7 +328,6 @@
         }
         
         .n8n-chat-widget .whatsapp-btn:disabled {
-            /* Background and color set in .whatsapp-btn above for consistency */
             cursor: not-allowed;
         }
 
@@ -359,15 +357,16 @@
             display: none;
         }
         
-        /* --- Chat Toggle Button (Always visible) --- */
+        /* --- Chat Toggle Button (Pill/Extended Bubble) --- */
         .n8n-chat-widget .chat-toggle {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 60px; /* Enforce perfect circle */
-            height: 60px; /* Enforce perfect circle */
-            border-radius: 50%; /* Use 50% for reliable circle */
-            background: #25D366; /* Solid WhatsApp green */
+            width: auto; /* Allow width to fit content */
+            padding: 12px 20px; /* Padding for text and icon */
+            height: 48px; /* Slightly smaller height for better pill look */
+            border-radius: 24px !important; /* **CRITICAL FIX: Force roundness on the ends** */
+            background: #25D366; 
             color: white; 
             border: none;
             cursor: pointer;
@@ -377,6 +376,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 16px; /* Text size for 'Hi!' */
+            font-weight: 600;
+            text-decoration: none;
+            gap: 10px; /* Space between text and icon */
         }
 
         .n8n-chat-widget .chat-toggle.position-left {
@@ -386,12 +389,19 @@
 
         .n8n-chat-widget .chat-toggle:hover {
             transform: scale(1.05);
-            background: #1da851; /* Darker green on hover */
+            background: #1da851; 
+        }
+        
+        /* When modal is open, shrink to just the icon */
+        .n8n-chat-widget .chat-toggle[style*="display: none"] {
+            /* This class is primarily hidden when the modal is open, 
+               but we keep the styling here for completeness if needed */
         }
 
+
         .n8n-chat-widget .chat-toggle svg {
-            width: 32px; 
-            height: 32px;
+            width: 24px; /* Slightly reduced icon size */
+            height: 24px;
             fill: white !important; 
             flex-shrink: 0;
             pointer-events: none; 
@@ -516,8 +526,9 @@
     chatToggle.className = `chat-toggle${config.style.position === 'left' ? ' position-left' : ''}`;
     chatToggle.title = 'Chat With Us';
     
-    // **Final, Robust SVG Implementation for the Chat Toggle**
+    // **Combined Text and SVG for Pill Look**
     chatToggle.innerHTML = `
+        <span>Hi!</span>
         <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
             <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
         </svg>
