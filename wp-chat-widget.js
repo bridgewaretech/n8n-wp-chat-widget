@@ -62,7 +62,7 @@
     // Default selected code (e.g., Australia or the first one)
     const defaultCountryCode = countryCodes.find(c => c.code === 'AU') || countryCodes[0]; 
 
-    // --- Custom Styles for Form/Modal View ---
+    // --- Custom Styles for Form/Modal View (CRITICAL HEIGHT FIX INCLUDED) ---
     const styles = `
         .n8n-chat-widget {
             --chat--color-primary: var(--n8n-chat-primary-color, ${config.style.primaryColor}); 
@@ -115,7 +115,7 @@
         @media (min-width: 601px) {
             .n8n-chat-widget .chat-container {
                 width: 700px;
-                height: 600px;
+                height: 600px; /* Explicit height ensures form-content-area can use 100% */
             }
         }
         
@@ -149,7 +149,7 @@
             }
         }
 
-        /* Form Content Area: Use Flexbox to separate header/inputs from footer */
+        /* Form Content Area: IMPORTANT - height: 100% added to ensure flex pinning works */
         .n8n-chat-widget .form-content-area {
             flex: 1 1 55%;
             padding: 40px;
@@ -159,7 +159,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between; 
-            height: 100%; 
+            height: 100%; /* <<-- CRITICAL FIX: Ensures this element fills parent height */
+            box-sizing: border-box; /* Include padding in height calculation */
         }
 
         /* Wrapper for scrolling content */
@@ -167,7 +168,8 @@
             overflow-y: auto; /* Allows only the form fields to scroll if needed */
             padding-right: 15px; /* Space for scrollbar */
             margin-right: -15px; /* Compensate for right padding */
-            margin-bottom: 20px; /* Space before the action area */
+            margin-bottom: 20px; 
+            /* Flex takes care of spacing */
         }
         
         /* Close Button (Top Right of Form) */
