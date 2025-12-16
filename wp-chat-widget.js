@@ -156,7 +156,7 @@
         /* Form Content Area: IMPORTANT - height: 100% added to ensure flex pinning works */
         .n8n-chat-widget .form-content-area {
             flex: 1 1 55%;
-            padding: 30px; /* FIXED: Reduced vertical padding from 40px to 30px to save space */
+            padding: 30px; 
             background: white;
             border-radius: 12px;
             position: relative;
@@ -169,7 +169,7 @@
 
         /* Wrapper for scrolling content */
         .n8n-chat-widget .form-scroll-content {
-            overflow-y: hidden; /* Prevents scrollbar from appearing */
+            overflow-y: hidden; 
             margin-right: 0; 
             padding-right: 0;
             margin-bottom: 16px; 
@@ -208,7 +208,7 @@
         
         /* Input Field Spacing FIX */
         .n8n-chat-widget .input-group {
-            margin-bottom: 14px; /* FIXED: Reduced spacing between fields from 16px to 14px */
+            margin-bottom: 14px; 
             position: relative;
         }
 
@@ -266,7 +266,7 @@
             display: flex;
             align-items: flex-start;
             margin-top: 5px; 
-            margin-bottom: 16px; /* Standardized vertical spacing before the button */
+            margin-bottom: 16px; 
             font-size: 13px; 
             line-height: 1.2; 
             color: var(--chat--color-font); 
@@ -469,7 +469,7 @@
         </div>
         
         <div class="input-group">
-            <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" />
+            <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" required />
         </div>
 
         <div class="terms-checkbox-group">
@@ -561,6 +561,12 @@
         countryCodeSelect.appendChild(option);
     });
     
+    // Function to check if the email format is basically valid
+    function isEmailValid(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    }
+
     // --- Handlers ---
     
     function showModal() {
@@ -577,12 +583,23 @@
     }
 
     function updateButtonState() {
-        // Validation logic
-        const isNameValid = nameInput.value.trim().length > 0;
-        const isPhoneValid = phoneInput.value.trim().length >= 5; 
+        const name = nameInput.value.trim();
+        const lastName = lastNameInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const email = emailInput.value.trim();
+        
+        // 1. Check basic mandatory fields
+        const isNameValid = name.length > 0;
+        const isLastNameValid = lastName.length > 0;
         const isTermsChecked = termsCheckbox.checked;
         
-        if (isNameValid && isPhoneValid && isTermsChecked) {
+        // 2. Check Phone Number: minimum 5 digits and ONLY digits
+        const isPhoneFormatValid = phone.length >= 5 && /^\d+$/.test(phone);
+        
+        // 3. Check Email: required and valid format
+        const isEmailFormatValid = isEmailValid(email);
+
+        if (isNameValid && isLastNameValid && isPhoneFormatValid && isEmailFormatValid && isTermsChecked) {
             whatsappBtn.removeAttribute('disabled');
         } else {
             whatsappBtn.setAttribute('disabled', 'true');
@@ -599,10 +616,12 @@
         const countryCode = countryCodeSelect.value;
         const fullPhoneNumber = countryCode + phone;
         
-        if (!termsCheckbox.checked) {
-            errorEl.textContent = "You need to accept Our Privacy Policy and Our Terms and Conditions.";
-            errorEl.style.display = 'block';
-            return;
+        // Re-check validation just in case the button was manually enabled
+        updateButtonState(); 
+        if (whatsappBtn.disabled) {
+             errorEl.textContent = "Please fill in all mandatory fields correctly.";
+             errorEl.style.display = 'block';
+             return;
         }
         
         // 1. Send data to n8n backend for lead logging
@@ -642,9 +661,12 @@
     whatsappBtn.addEventListener('click', handleWhatsAppStart);
 
     // Input listeners to enable/disable button
-    [nameInput, phoneInput, termsCheckbox].forEach(el => {
+    [nameInput, lastNameInput, phoneInput, emailInput, termsCheckbox].forEach(el => {
         el.addEventListener('input', updateButtonState);
     });
+
+    // Initial state check
+    updateButtonState();
 
     // Start with modal closed and toggle button visible
     openBtn.style.display = 'flex';
