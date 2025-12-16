@@ -4,17 +4,17 @@
     // but the intention is for the WordPress config to supply the actual values.
     const defaultConfig = {
         whatsapp: {
-            phoneNumber: '+12345678900',
-            prefilledMessage: 'Hello! I saw your form on the website and would like to start a conversation.',
-            n8nBackendUrl: 'https://your-n8n-instance/webhook/whatsapp-lead',
+            phoneNumber: '+61491788774',
+            prefilledMessage: 'Hi👋, This is Bridgy, thank you for contacting Bridgeware Technologies. How can we help you today?',
+            n8nBackendUrl: 'https://myExample-n8n-instance/webhook/whatsapp-lead',
         },
         branding: {
-            logo: 'https://example.com/biky-greenberg-image.png',
-            name: 'Biky Greenberg',
-            welcomeText: '¡Hola! Soy **[Agent Name]**, tu Vendedora con IA. Completa el formulario y me pondré en contacto contigo.',
+            logo: 'https://example.com/sarah-bridgeware-image.png',
+            name: 'Sarah Brisdgeware',
+            welcomeText: '¡Hi! I am **[Sarah]**, Your visrtual assistant. Fill the form to chat with me.',
             poweredBy: {
-                text: 'Biky AI is powered by Keybe AI',
-                link: 'https://keybe.ai/'
+                text: 'Sarah AI is powered by BWT AI',
+                link: 'https://bwtai.ai/'
             }
         },
         style: {
@@ -389,30 +389,30 @@
     const welcomeText = config.branding.welcomeText.replace('[Agent Name]', config.branding.name);
     
     formContentArea.innerHTML = `
-        <button class="close-button" title="Cerrar">×</button>
+        <button class="close-button" title="Close">×</button>
         <p class="welcome-text">${welcomeText}</p>
 
         <div class="input-group">
-            <input type="text" id="nombre" class="form-input" placeholder="Nombre" required />
+            <input type="text" id="nombre" class="form-input" placeholder="Name" required />
         </div>
         
         <div class="input-group">
-            <input type="text" id="apellido" class="form-input" placeholder="Apellido" required />
+            <input type="text" id="apellido" class="form-input" placeholder="LastName" required />
         </div>
         
         <div class="input-group phone-input-group">
             <select id="country-code" class="country-code-select"></select>
-            <input type="tel" id="telefono" class="form-input phone-number-input" placeholder="Teléfono" required />
+            <input type="tel" id="telefono" class="form-input phone-number-input" placeholder="Phone" required />
         </div>
         
         <div class="input-group">
-            <input type="email" id="correo-corporativo" class="form-input" placeholder="Correo Corporativo" />
+            <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" />
         </div>
 
         <div class="terms-checkbox-group">
             <input type="checkbox" id="terms-accepted" required />
             <label for="terms-accepted">
-                He leído y acepto el <a href="${config.links.serviceAgreement}" target="_blank">Acuerdo de Servicio</a>
+                I;ve read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a>
             </label>
         </div>
         
@@ -420,7 +420,7 @@
             <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
                 <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
             </svg>
-            Iniciar Conversación
+            Start Conversation
         </button>
         <div class="error-message" id="form-error"></div>
     `;
@@ -443,7 +443,7 @@
     // Create chat toggle button 
     const chatToggle = document.createElement('button');
     chatToggle.className = `chat-toggle${config.style.position === 'left' ? ' position-left' : ''}`;
-    chatToggle.title = 'Chatea con nosotros';
+    chatToggle.title = 'Chat With Us';
     chatToggle.innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -518,7 +518,7 @@
         const fullPhoneNumber = countryCode + phone;
         
         if (!termsCheckbox.checked) {
-            errorEl.textContent = 'Debes aceptar el Acuerdo de Servicio para continuar.';
+            errorEl.textContent = 'You need to accept Our Privacy Policy and Our Terms and Conditions.';
             errorEl.style.display = 'block';
             return;
         }
