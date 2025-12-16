@@ -115,7 +115,17 @@
         @media (min-width: 601px) {
             .n8n-chat-widget .chat-container {
                 width: 700px;
-                height: 600px; /* Explicit height ensures form-content-area can use 100% */
+                height: 600px; /* FIXED: Increased height to accommodate field spacing */
+                max-height: 90vh;
+            }
+        }
+        
+        @media (max-width: 600px) {
+             .n8n-chat-widget .chat-container {
+                 width: 95vw;
+                 height: auto;
+                 max-height: 90vh;
+                 border-radius: 8px;
             }
         }
         
@@ -141,15 +151,9 @@
             .n8n-chat-widget .form-content-area {
                 flex: 1 1 100%;
             }
-            .n8n-chat-widget .chat-container {
-                 width: 95vw;
-                 height: auto;
-                 max-height: 90vh;
-                 border-radius: 8px;
-            }
         }
 
-        /* Form Content Area: IMPORTANT - height: 100% added to ensure flex pinning works */
+        /* Form Content Area: height: 100% added to ensure flex pinning works */
         .n8n-chat-widget .form-content-area {
             flex: 1 1 55%;
             padding: 40px;
@@ -165,11 +169,11 @@
 
         /* Wrapper for scrolling content */
         .n8n-chat-widget .form-scroll-content {
-            overflow-y: auto; 
-            padding-right: 15px; /* Ensures space for scrollbar */
-            margin-right: -15px; /* Compensates for padding-right, keeping content flush */
-            margin-bottom: 16px; /* Space between last input and action area */
-            padding-bottom: 5px; /* Small buffer at the bottom of the scroll */
+            overflow-y: hidden; /* FIXED: Prevents scrollbar from appearing */
+            margin-right: 0; 
+            padding-right: 0;
+            margin-bottom: 16px; 
+            padding-bottom: 0; 
         }
         
         /* Close Button (Top Right of Form) */
@@ -204,7 +208,7 @@
         
         /* Input Field Spacing FIX */
         .n8n-chat-widget .input-group {
-            margin-bottom: 16px; /* **FIX: Standardized vertical spacing between groups** */
+            margin-bottom: 16px; /* Standardized vertical spacing between groups */
             position: relative;
         }
 
@@ -261,8 +265,8 @@
         .n8n-chat-widget .terms-checkbox-group {
             display: flex;
             align-items: flex-start;
-            margin-top: 5px; /* Reduced top margin to keep it close to the form element above */
-            margin-bottom: 16px; /* **FIX: Standardized vertical spacing before the button** */
+            margin-top: 5px; 
+            margin-bottom: 16px; /* Standardized vertical spacing before the button */
             font-size: 13px; 
             line-height: 1.2; 
             color: var(--chat--color-font); 
@@ -310,7 +314,7 @@
             font-weight: 600;
             transition: background 0.3s ease, transform 0.1s ease;
             font-family: inherit;
-            margin-top: 0; /* **FIX: Ensure no extra margin above the button from other elements** */
+            margin-top: 0; 
             margin-bottom: 10px; 
         }
 
