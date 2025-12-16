@@ -1,7 +1,5 @@
 (function() {
     // --- Configuration (Defaults - Overridden by WordPress Config) ---
-    // These defaults ensure the script runs even if the window.ChatWidgetConfig is missing, 
-    // but the intention is for the WordPress config to supply the actual values.
     const defaultConfig = {
         whatsapp: {
             phoneNumber: '+61412345678',
@@ -64,7 +62,7 @@
     // Default selected code (e.g., Australia or the first one)
     const defaultCountryCode = countryCodes.find(c => c.code === 'AU') || countryCodes[0]; 
 
-    // --- Custom Styles for Form/Modal View (FINAL FIXES) ---
+    // --- Custom Styles for Form/Modal View ---
     const styles = `
         .n8n-chat-widget {
             --chat--color-primary: var(--n8n-chat-primary-color, ${config.style.primaryColor}); 
@@ -195,7 +193,7 @@
             margin-bottom: 24px;
             line-height: 1.4;
             text-align: left;
-            margin-right: 30px; /* Space for the close button */
+            margin-right: 30px; 
         }
         .n8n-chat-widget .welcome-text strong {
             font-weight: 700;
@@ -261,7 +259,7 @@
             display: flex;
             align-items: flex-start;
             margin-top: 10px; 
-            margin-bottom: 15px; /* Reduced for better fit */
+            margin-bottom: 15px; 
             font-size: 13px; 
             line-height: 1.2; 
             color: var(--chat--color-font); 
@@ -287,8 +285,6 @@
             text-decoration: none;
             font-weight: 600;
             transition: opacity 0.2s;
-            /* Allow wrapping of link text if necessary on very small screens, 
-               but rely on the reduced font size to make it fit */
         }
         .n8n-chat-widget .terms-checkbox-group a:hover {
             opacity: 0.8;
@@ -311,8 +307,8 @@
             font-weight: 600;
             transition: background 0.3s ease, transform 0.1s ease;
             font-family: inherit;
-            margin-top: auto; /* Pushes button away from scrolling content */
-            margin-bottom: 10px; /* Space above footer */
+            margin-top: auto; 
+            margin-bottom: 10px; 
         }
 
         .n8n-chat-widget .whatsapp-btn:hover {
@@ -455,12 +451,12 @@
         <div class="terms-checkbox-group">
             <input type="checkbox" id="terms-accepted" required />
             <label for="terms-accepted">
-                I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
+                I have read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
             </label>
         </div>
     `;
 
-    // Create Button and Error Message wrapper
+    // Create Button and Error Message wrapper (Action Area)
     const actionArea = document.createElement('div');
     actionArea.innerHTML = `
         <button class="whatsapp-btn" type="button" disabled>
@@ -478,10 +474,153 @@
     closeButton.title = 'Close';
     closeButton.innerHTML = '×';
     
-    // Footer (placed inside form content area to maintain centering/flex layout)
+    // Footer
 	const footer = document.createElement('div');
 	footer.className = 'chat-footer';
 	footer.innerHTML = `
 		<a href="${config.branding.poweredBy.link}" target="_blank" rel="noopener noreferrer">
 			${config.branding.poweredBy.text}
 		</a>
+	`;
+
+    // Assemble form content area
+    formContentArea.appendChild(closeButton);
+    formContentArea.appendChild(formScrollContent);
+    formContentArea.appendChild(actionArea);
+    formContentArea.appendChild(footer); 
+    
+    chatContainer.appendChild(formContentArea);
+    chatOverlay.appendChild(chatContainer);
+    widgetContainer.appendChild(chatOverlay);
+
+    
+    // Create chat toggle button 
+    const chatToggle = document.createElement('button');
+    chatToggle.className = `chat-toggle${config.style.position === 'left' ? ' position-left' : ''}`;
+    chatToggle.title = 'Chat With Us';
+    chatToggle.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+    `;
+    widgetContainer.appendChild(chatToggle);
+
+    // Append widget to body
+    document.body.appendChild(widgetContainer);
+
+    // --- Elements references ---
+    const openBtn = chatToggle;
+    const closeBtn = closeButton; 
+    const whatsappBtn = actionArea.querySelector('.whatsapp-btn');
+    const termsCheckbox = formScrollContent.querySelector('#terms-accepted');
+    const nameInput = formScrollContent.querySelector('#nombre');
+    const lastNameInput = formScrollContent.querySelector('#apellido');
+    const phoneInput = formScrollContent.querySelector('#telefono');
+    const emailInput = formScrollContent.querySelector('#correo-corporativo');
+    const countryCodeSelect = formScrollContent.querySelector('#country-code');
+    const errorEl = actionArea.querySelector('#form-error');
+
+    // --- Initialization and Utility ---
+    
+    // Populate Country Code Dropdown
+    countryCodes.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country.dial_code;
+        option.textContent = country.dial_code;
+        if (country.dial_code === defaultCountryCode.dial_code) {
+             option.selected = true;
+        }
+        countryCodeSelect.appendChild(option);
+    });
+    
+    // --- Handlers ---
+    
+    function showModal() {
+        chatOverlay.classList.add('open');
+        chatContainer.classList.add('open');
+        openBtn.style.display = 'none';
+        errorEl.style.display = 'none';
+    }
+
+    function closeModal() {
+        chatOverlay.classList.remove('open');
+        chatContainer.classList.remove('open');
+        openBtn.style.display = 'flex';
+    }
+
+    function updateButtonState() {
+        // Validation logic
+        const isNameValid = nameInput.value.trim().length > 0;
+        const isPhoneValid = phoneInput.value.trim().length >= 5; 
+        const isTermsChecked = termsCheckbox.checked;
+        
+        if (isNameValid && isPhoneValid && isTermsChecked) {
+            whatsappBtn.removeAttribute('disabled');
+        } else {
+            whatsappBtn.setAttribute('disabled', 'true');
+        }
+    }
+
+    async function handleWhatsAppStart(e) {
+        e.preventDefault();
+        
+        const name = nameInput.value.trim();
+        const lastName = lastNameInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const email = emailInput.value.trim();
+        const countryCode = countryCodeSelect.value;
+        const fullPhoneNumber = countryCode + phone;
+        
+        if (!termsCheckbox.checked) {
+            errorEl.textContent = "You need to accept Our Privacy Policy and Our Terms and Conditions.";
+            errorEl.style.display = 'block';
+            return;
+        }
+        
+        // 1. Send data to n8n backend for lead logging
+        // We use the URL provided in the WordPress config (config.whatsapp.n8nBackendUrl)
+        try {
+            await fetch(config.whatsapp.n8nBackendUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName: name,
+                    lastName: lastName,
+                    phone: fullPhoneNumber,
+                    email: email,
+                    source: 'Website Chat Form'
+                })
+            });
+            // We ignore errors here so the user can still start the chat if the backend logging fails
+        } catch (err) {
+            console.error('Error logging lead to n8n:', err);
+        }
+        
+        // 2. Redirect to WhatsApp
+        // We use the WhatsApp number provided in the WordPress config (config.whatsapp.phoneNumber)
+        const whatsappUrl = `https://wa.me/${config.whatsapp.phoneNumber.replace('+', '')}?text=${encodeURIComponent(config.whatsapp.prefilledMessage + ' - ' + name + ' ' + lastName + ' (' + fullPhoneNumber + ')')}`;
+        
+        // Open in a new tab/window
+        window.open(whatsappUrl, '_blank');
+        
+        // Close the modal after redirection
+        closeModal();
+    }
+
+
+    // --- Event listeners ---
+    openBtn.addEventListener('click', showModal);
+    closeBtn.addEventListener('click', closeModal);
+    whatsappBtn.addEventListener('click', handleWhatsAppStart);
+
+    // Input listeners to enable/disable button
+    [nameInput, phoneInput, termsCheckbox].forEach(el => {
+        el.addEventListener('input', updateButtonState);
+    });
+
+    // Start with modal closed and toggle button visible
+    openBtn.style.display = 'flex';
+    chatContainer.classList.remove('open');
+    chatOverlay.classList.remove('open');
+
+})();
