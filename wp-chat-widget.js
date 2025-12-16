@@ -159,17 +159,16 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between; 
-            height: 100%; /* <<-- CRITICAL FIX: Ensures this element fills parent height */
-            box-sizing: border-box; /* Include padding in height calculation */
+            height: 100%; 
+            box-sizing: border-box; 
         }
 
         /* Wrapper for scrolling content */
         .n8n-chat-widget .form-scroll-content {
-            overflow-y: auto; /* Allows only the form fields to scroll if needed */
-            padding-right: 15px; /* Space for scrollbar */
-            margin-right: -15px; /* Compensate for right padding */
+            overflow-y: auto; 
+            padding-right: 15px; 
+            margin-right: -15px; 
             margin-bottom: 20px; 
-            /* Flex takes care of spacing */
         }
         
         /* Close Button (Top Right of Form) */
@@ -301,8 +300,8 @@
             gap: 10px;
             width: 100%;
             padding: 15px 24px;
-            background: var(--chat--color-primary);
-            color: white;
+            background: #f1f1f1; /* Changed to lighter gray background */
+            color: #888888; /* Changed to gray text color */
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -313,19 +312,24 @@
             margin-top: 0; 
             margin-bottom: 10px; 
         }
+
+        /* Styling for ENABLED button */
+        .n8n-chat-widget .whatsapp-btn:not(:disabled) {
+            background: var(--chat--color-primary);
+            color: white;
+        }
         
         /* Action Area Wrapper - Ensure it sits above the footer */
         .n8n-chat-widget .action-area {
             margin-top: auto; 
         }
 
-        .n8n-chat-widget .whatsapp-btn:hover {
+        .n8n-chat-widget .whatsapp-btn:hover:not(:disabled) {
             background: #008f1b;
         }
         
         .n8n-chat-widget .whatsapp-btn:disabled {
-            background: #dcdcdc; 
-            color: #888888; 
+            /* Background and color set in .whatsapp-btn above for consistency */
             cursor: not-allowed;
         }
 
@@ -360,11 +364,11 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 30px;
-            background: linear-gradient(135deg, var(--chat--color-primary) 0%, var(--chat--color-secondary) 100%);
-            color: white; /* **CRITICAL FIX: Sets the default icon fill color to white** */
+            width: 60px; /* Enforce perfect circle */
+            height: 60px; /* Enforce perfect circle */
+            border-radius: 50%; /* Use 50% for reliable circle */
+            background: #25D366; /* Solid WhatsApp green */
+            color: white; 
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -382,12 +386,15 @@
 
         .n8n-chat-widget .chat-toggle:hover {
             transform: scale(1.05);
+            background: #1da851; /* Darker green on hover */
         }
 
         .n8n-chat-widget .chat-toggle svg {
-            width: 28px; /* **Increased size slightly to ensure visibility** */
-            height: 28px;
-            fill: currentColor; /* Inherits the 'color: white' from the button */
+            width: 32px; 
+            height: 32px;
+            fill: white !important; 
+            flex-shrink: 0;
+            pointer-events: none; 
         }
     `;
 
@@ -470,7 +477,7 @@
     actionArea.className = 'action-area';
     actionArea.innerHTML = `
         <button class="whatsapp-btn" type="button" disabled>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                 <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
             </svg>
             Start Conversation
@@ -509,9 +516,9 @@
     chatToggle.className = `chat-toggle${config.style.position === 'left' ? ' position-left' : ''}`;
     chatToggle.title = 'Chat With Us';
     
-    // **ICON FIX HERE: Finalized WhatsApp SVG structure for reliable rendering**
+    // **Final, Robust SVG Implementation for the Chat Toggle**
     chatToggle.innerHTML = `
-        <svg viewBox="0 0 24 24">
+        <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
             <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
         </svg>
     `;
