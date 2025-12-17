@@ -1,14 +1,16 @@
 /**
  * Bridgy AI WhatsApp Lead Widget
- * Version: 2.5
- * * CHANGES:
- * - Optimized WhatsApp Icon: Scaled up and properly centered for a better look.
- * - Header Refresh: Reduced font size for a more sophisticated, less crowded feel.
- * - UX Close Button: Smaller, more discreet footprint while remaining highly visible.
- * - Stability: Retained the "Rock-Solid" hover fix for the action button.
+ * Version: 2.6
+ * * SUMMARY OF FIXES:
+ * - Restored "Powered By" footer link and fixed its positioning.
+ * - WhatsApp Icon: High-fidelity SVG, scaled to 24px for better visibility.
+ * - Header: Reduced to 19px for a premium, modern feel.
+ * - Close Button: Compact UX design (13px font) to save space.
+ * - Hover Stability: CSS "!important" flags used to prevent button disappearance.
  */
 (function() {
-    // --- 1. CONFIGURATION ---
+    // --- 1. CONFIGURATION OBJECT ---
+    // All customizable settings are centralized here for easy updates.
     const defaultConfig = {
         whatsapp: {
             phoneNumber: '+61412345678',
@@ -36,7 +38,7 @@
         }
     };
 
-    // Configuration Merge
+    // Merges local defaults with any global window.ChatWidgetConfig settings
     const config = window.ChatWidgetConfig ? 
         {
             whatsapp: { ...defaultConfig.whatsapp, ...window.ChatWidgetConfig.whatsapp },
@@ -45,10 +47,11 @@
             links: { ...defaultConfig.links, ...window.ChatWidgetConfig.links }
         } : defaultConfig;
 
+    // Prevent double initialization
     if (window.N8NChatWidgetInitialized) return;
     window.N8NChatWidgetInitialized = true;
 
-    // --- 2. COUNTRY CODES ---
+    // --- 2. DATA: COUNTRY CODES ---
     const countryCodes = [
         { name: 'Australia', code: 'AU', dial_code: '+61' },
         { name: 'United States', code: 'US', dial_code: '+1' },
@@ -59,7 +62,7 @@
     
     const defaultCountryCode = countryCodes.find(c => c.code === 'AU') || countryCodes[0]; 
 
-    // --- 3. CSS STYLES ---
+    // --- 3. CSS STYLING ---
     const styles = `
         .n8n-chat-widget {
             --chat-navy: #1c274b;
@@ -68,6 +71,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
+        /* Modal Overlay - Darkens page background */
         .n8n-chat-widget .chat-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6); z-index: 1001; display: none; 
@@ -75,27 +79,30 @@
         }
         .n8n-chat-widget .chat-overlay.open { display: flex; }
         
+        /* Main Container - Shared layout for image and form */
         .n8n-chat-widget .chat-container {
             display: flex; width: 95%; max-width: 820px; height: 580px;
             background: white; border-radius: 20px; overflow: hidden; position: relative;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
         
+        /* Sidebar - Displays Bridgy's image */
         .n8n-chat-widget .image-sidebar {
             flex: 0 0 42%; background-image: url('${config.branding.logo}');
             background-size: cover; background-position: center;
         }
         
+        /* Form Area - Handles inputs and footer */
         .n8n-chat-widget .form-content-area {
             flex: 1; padding: 35px; display: flex; flex-direction: column; position: relative;
         }
 
-        /* Smaller Header Font */
         .n8n-chat-widget .welcome-header {
             font-size: 19px; color: ${config.style.headerTextColor}; 
             margin-bottom: 20px; line-height: 1.4; font-weight: 600;
         }
 
+        /* Inputs - Styled for clarity and focus */
         .n8n-chat-widget .form-input {
             width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px;
             border: 2px solid transparent; background: var(--chat-bg-input); color: #333; font-size: 15px; box-sizing: border-box;
@@ -105,7 +112,7 @@
         .n8n-chat-widget .phone-input-group { display: flex; gap: 10px; margin-bottom: 10px; }
         .n8n-chat-widget .country-code-select { width: 85px; cursor: pointer; }
 
-        /* CTA Button Styling */
+        /* CTA Button - "Start Conversation" with hover stability */
         .n8n-chat-widget .whatsapp-btn {
             display: flex; align-items: center; justify-content: center; gap: 12px;
             width: 100%; padding: 15px; border-radius: 12px; border: none;
@@ -117,7 +124,7 @@
         .n8n-chat-widget .whatsapp-btn:hover:not(:disabled) { background-color: #2a3a6d !important; transform: translateY(-1px); }
         .n8n-chat-widget .whatsapp-btn:disabled { opacity: 0.6 !important; cursor: not-allowed; background-color: #666 !important; }
 
-        /* Smaller, Sleeker Close Button */
+        /* Close Button - Smaller, top-right positioning */
         .n8n-chat-widget .ux-close-btn {
             position: absolute; right: 15px; top: 15px; padding: 6px 12px;
             background: #f2f2f2; border: none; border-radius: 6px; color: #777;
@@ -126,6 +133,7 @@
         }
         .n8n-chat-widget .ux-close-btn:hover { background: #e0e0e0; color: #333; }
 
+        /* Floating Button - Toggle on the bottom right of the website */
         .n8n-chat-widget .chat-toggle {
             position: fixed; bottom: 30px; right: 30px;
             padding: 15px 25px; border-radius: 50px; background: var(--chat-green);
@@ -134,6 +142,13 @@
         }
         
         .n8n-chat-widget .terms-text { font-size: 12px; color: #777; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .n8n-chat-widget .terms-text a { color: #00bcd4; text-decoration: none; font-weight: 600; }
+
+        /* Footer Branding */
+        .n8n-chat-widget .powered-by-footer {
+            text-align: center; margin-top: auto; padding-top: 15px; font-size: 11px;
+        }
+        .n8n-chat-widget .powered-by-footer a { color: #00bcd4; text-decoration: none; font-weight: 600; }
     `;
 
     const styleSheet = document.createElement('style');
@@ -166,6 +181,7 @@
                             <span>I accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms</a> and <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>.</span>
                         </div>
                     </div>
+                    
                     <div class="action-area">
                         <button class="whatsapp-btn" id="submit-btn" disabled>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -174,6 +190,12 @@
                             Start Conversation
                         </button>
                         <p id="form-error" style="color:#d32f2f; display:none; font-size:12px; text-align:center; margin-top:8px; font-weight:bold;"></p>
+                    </div>
+
+                    <div class="powered-by-footer">
+                        <a href="${config.branding.poweredBy.link}" target="_blank">
+                            ${config.branding.poweredBy.text}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -185,7 +207,7 @@
     `;
     document.body.appendChild(widget);
 
-    // --- 5. LOGIC & EVENT HANDLERS ---
+    // --- 5. FUNCTIONALITY & LOGIC ---
     const overlay = widget.querySelector('.chat-overlay');
     const toggle = widget.querySelector('.chat-toggle');
     const closeBtn = widget.querySelector('.ux-close-btn');
@@ -194,6 +216,7 @@
     const actionArea = widget.querySelector('.action-area');
     const countrySelect = widget.querySelector('#country-code');
 
+    /** Populates the country dropdown with phone prefixes */
     countryCodes.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.dial_code;
@@ -202,11 +225,13 @@
         countrySelect.appendChild(opt);
     });
 
+    /** Handles opening and closing the widget */
     function toggleModal(show) {
         overlay.classList.toggle('open', show);
         toggle.style.display = show ? 'none' : 'flex';
     }
 
+    /** Validates that all fields are filled and checkbox is ticked */
     function validate() {
         const isFilled = widget.querySelector('#nombre').value.trim() && 
                          widget.querySelector('#apellido').value.trim() &&
@@ -216,6 +241,7 @@
         submitBtn.disabled = !isFilled;
     }
 
+    /** Sends lead data to n8n webhook and handles success/error states */
     async function sendToWebhook() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = 'Connecting...';
@@ -237,6 +263,7 @@
             });
 
             if (res.ok) {
+                // Success: Show confirmation message
                 scrollContent.innerHTML = `
                     <div style="text-align:center; padding: 50px 20px;">
                         <div style="font-size: 60px; color: #25D366; margin-bottom: 15px;">✓</div>
@@ -252,6 +279,7 @@
                 throw new Error();
             }
         } catch (e) {
+            // Error: Notify user
             const err = widget.querySelector('#form-error');
             err.textContent = "Error connecting. Please try again.";
             err.style.display = 'block';
@@ -260,6 +288,7 @@
         }
     }
 
+    // --- 6. EVENT ATTACHMENTS ---
     toggle.onclick = () => toggleModal(true);
     closeBtn.onclick = () => toggleModal(false);
     submitBtn.onclick = sendToWebhook;
