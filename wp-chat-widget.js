@@ -1,11 +1,11 @@
 /**
  * Bridgy AI WhatsApp Lead Widget
- * Version: 2.4
+ * Version: 2.5
  * * CHANGES:
- * - PERMANENT FIX: Hover button disappearance issue resolved.
- * - NEW: Added WhatsApp icon inside the main CTA button.
- * - Darkened header text for premium readability.
- * - UX Close Button with hover effects.
+ * - Optimized WhatsApp Icon: Scaled up and properly centered for a better look.
+ * - Header Refresh: Reduced font size for a more sophisticated, less crowded feel.
+ * - UX Close Button: Smaller, more discreet footprint while remaining highly visible.
+ * - Stability: Retained the "Rock-Solid" hover fix for the action button.
  */
 (function() {
     // --- 1. CONFIGURATION ---
@@ -16,7 +16,7 @@
             n8nBackendUrl: 'https://your-n8n-webhook-url.com',
         },
         branding: {
-            logo: 'https://example.com/sarah-bridgeware-image.png', // Replace with your image URL
+            logo: 'https://example.com/sarah-bridgeware-image.png',
             name: 'Bridgy',
             welcomeText: 'Hi! 👋 I’m **[Bridgy]**, your virtual assistant. Start a conversation with me on WhatsApp.',
             poweredBy: {
@@ -36,6 +36,7 @@
         }
     };
 
+    // Configuration Merge
     const config = window.ChatWidgetConfig ? 
         {
             whatsapp: { ...defaultConfig.whatsapp, ...window.ChatWidgetConfig.whatsapp },
@@ -75,54 +76,55 @@
         .n8n-chat-widget .chat-overlay.open { display: flex; }
         
         .n8n-chat-widget .chat-container {
-            display: flex; width: 95%; max-width: 850px; height: 600px;
+            display: flex; width: 95%; max-width: 820px; height: 580px;
             background: white; border-radius: 20px; overflow: hidden; position: relative;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
         
         .n8n-chat-widget .image-sidebar {
-            flex: 0 0 45%; background-image: url('${config.branding.logo}');
+            flex: 0 0 42%; background-image: url('${config.branding.logo}');
             background-size: cover; background-position: center;
         }
         
         .n8n-chat-widget .form-content-area {
-            flex: 1; padding: 40px; display: flex; flex-direction: column; position: relative;
+            flex: 1; padding: 35px; display: flex; flex-direction: column; position: relative;
         }
 
+        /* Smaller Header Font */
         .n8n-chat-widget .welcome-header {
-            font-size: 22px; color: ${config.style.headerTextColor}; 
-            margin-bottom: 25px; line-height: 1.4; font-weight: 700;
+            font-size: 19px; color: ${config.style.headerTextColor}; 
+            margin-bottom: 20px; line-height: 1.4; font-weight: 600;
         }
 
         .n8n-chat-widget .form-input {
-            width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px;
-            border: 2px solid transparent; background: var(--chat-bg-input); color: #333; font-size: 16px; box-sizing: border-box;
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px;
+            border: 2px solid transparent; background: var(--chat-bg-input); color: #333; font-size: 15px; box-sizing: border-box;
         }
         .n8n-chat-widget .form-input:focus { border-color: var(--chat-navy); outline: none; }
 
-        .n8n-chat-widget .phone-input-group { display: flex; gap: 10px; margin-bottom: 12px; }
-        .n8n-chat-widget .country-code-select { width: 90px; cursor: pointer; }
+        .n8n-chat-widget .phone-input-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .n8n-chat-widget .country-code-select { width: 85px; cursor: pointer; }
 
-        /* FIXED BUTTON STYLES */
+        /* CTA Button Styling */
         .n8n-chat-widget .whatsapp-btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            width: 100%; padding: 16px; border-radius: 12px; border: none;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            width: 100%; padding: 15px; border-radius: 12px; border: none;
             background-color: var(--chat-navy) !important; color: white !important; 
             font-size: 16px; font-weight: bold; cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s ease; 
-            margin-top: 10px; visibility: visible !important; opacity: 1 !important;
+            transition: all 0.2s ease; margin-top: 10px;
+            visibility: visible !important; opacity: 1 !important;
         }
-        .n8n-chat-widget .whatsapp-btn:hover:not(:disabled) { background-color: #2a3a6d !important; }
-        .n8n-chat-widget .whatsapp-btn:active { transform: scale(0.98); }
+        .n8n-chat-widget .whatsapp-btn:hover:not(:disabled) { background-color: #2a3a6d !important; transform: translateY(-1px); }
         .n8n-chat-widget .whatsapp-btn:disabled { opacity: 0.6 !important; cursor: not-allowed; background-color: #666 !important; }
 
+        /* Smaller, Sleeker Close Button */
         .n8n-chat-widget .ux-close-btn {
-            position: absolute; right: 20px; top: 20px; padding: 8px 15px;
-            background: #f0f0f0; border: none; border-radius: 8px; color: #666;
-            font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;
+            position: absolute; right: 15px; top: 15px; padding: 6px 12px;
+            background: #f2f2f2; border: none; border-radius: 6px; color: #777;
+            font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;
             transition: all 0.2s ease; z-index: 10;
         }
-        .n8n-chat-widget .ux-close-btn:hover { background: #ff4d4d; color: white; }
+        .n8n-chat-widget .ux-close-btn:hover { background: #e0e0e0; color: #333; }
 
         .n8n-chat-widget .chat-toggle {
             position: fixed; bottom: 30px; right: 30px;
@@ -131,8 +133,7 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.2); font-weight: bold; font-size: 16px;
         }
         
-        .n8n-chat-widget .terms-text { font-size: 13px; color: #777; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        .n8n-chat-widget .terms-text a { color: #00bcd4; text-decoration: none; font-weight: 600; }
+        .n8n-chat-widget .terms-text { font-size: 12px; color: #777; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
     `;
 
     const styleSheet = document.createElement('style');
@@ -161,13 +162,15 @@
                         </div>
                         <input type="email" id="correo" class="form-input" placeholder="Email Address">
                         <div class="terms-text">
-                            <input type="checkbox" id="terms-accepted" style="width:18px; height:18px;"> 
+                            <input type="checkbox" id="terms-accepted" style="width:16px; height:16px;"> 
                             <span>I accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms</a> and <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>.</span>
                         </div>
                     </div>
                     <div class="action-area">
                         <button class="whatsapp-btn" id="submit-btn" disabled>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 2.004c-5.513 0-9.989 4.477-9.989 9.991 0 1.763.459 3.42 1.263 4.86L2 22l5.289-1.388a9.948 9.948 0 004.742 1.196h.001c5.513 0 9.99-4.478 9.99-9.992 0-5.514-4.477-9.992-9.991-9.992zM17.6 15.65c-.244.686-1.439 1.32-1.95 1.32-.51 0-1.11-.194-1.72-.714-.61-.519-2.28-1.166-2.79-1.166-.51 0-.66.393-.91.686-.244.296-.487.593-.732.889-.244.296-.488.592-.976.592-.487 0-1.88-.716-2.81-1.77-.93-.1-1.54-2.35-1.73-2.646-.194-.296 0-.46.15-.62.15-.16.33-.37.49-.55.15-.18.2-.3.3-.49.1-.2.05-.37-.02-.55-.08-.18-.73-1.76-1-2.42-.26-.66-.53-.57-.73-.57-.18 0-.38-.03-.58-.03-.2 0-.53.03-.82.3-.29.27-1.11 1.1-1.11 2.7 0 1.59 1.14 3.12 1.3 3.35.16.23 2.25 3.52 5.46 4.93 3.21 1.41 3.21.94 3.88.94.67 0 2.18-.82 2.46-1.62.28-.79.28-1.23.2-1.37-.08-.14-.24-.22-.51-.36z"/></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12.031 2C6.49 2 2 6.49 2 12.03c0 1.764.46 3.42 1.263 4.86L2 22l5.29-1.388c1.44.734 3.067 1.196 4.741 1.196h.001c5.54 0 10.03-4.49 10.03-10.03S17.57 2 12.031 2ZM17.202 15.82c-.284.8-.98 1.448-1.745 1.713-.64.22-1.28.31-2.02.13-.53-.13-1.02-.34-1.53-.59-2.14-1.05-3.83-2.91-4.73-5.1-.21-.5-.39-1.02-.45-1.56-.05-.72.07-1.37.38-1.99.31-.61.88-1.07 1.54-1.22.25-.06.51-.06.76.02.2.06.37.19.49.36l1.01 1.45c.17.24.22.54.14.83-.05.18-.16.34-.3.47l-.61.54c-.13.12-.17.3-.1.46.36.85 1.01 1.55 1.83 2.01.16.09.36.08.51-.03l.7-.62c.16-.14.37-.2.58-.17.28.05.54.2.73.41l1.19 1.34c.18.2.27.46.24.72z" fill="white"/>
+                            </svg>
                             Start Conversation
                         </button>
                         <p id="form-error" style="color:#d32f2f; display:none; font-size:12px; text-align:center; margin-top:8px; font-weight:bold;"></p>
@@ -235,22 +238,22 @@
 
             if (res.ok) {
                 scrollContent.innerHTML = `
-                    <div style="text-align:center; padding: 60px 20px;">
-                        <div style="font-size: 70px; color: #25D366; margin-bottom: 20px;">✓</div>
-                        <h2 style="color: #1c274b; margin-bottom: 10px;">All Set!</h2>
-                        <p style="font-size: 18px; color: #444; line-height: 1.5;">
-                            Thank you, <b>${payload.firstName}</b>. Bridgy will be messaging you on WhatsApp shortly!
+                    <div style="text-align:center; padding: 50px 20px;">
+                        <div style="font-size: 60px; color: #25D366; margin-bottom: 15px;">✓</div>
+                        <h2 style="color: #1c274b; margin-bottom: 10px; font-size: 22px;">Success!</h2>
+                        <p style="font-size: 16px; color: #444; line-height: 1.5;">
+                            Thanks, <b>${payload.firstName}</b>. Bridgy will reach out on WhatsApp shortly.
                         </p>
                     </div>
                 `;
                 actionArea.style.display = 'none';
-                setTimeout(() => { toggleModal(false); location.reload(); }, 6000);
+                setTimeout(() => { toggleModal(false); location.reload(); }, 5000);
             } else {
                 throw new Error();
             }
         } catch (e) {
             const err = widget.querySelector('#form-error');
-            err.textContent = "Unable to connect. Please try again.";
+            err.textContent = "Error connecting. Please try again.";
             err.style.display = 'block';
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Start Conversation';
