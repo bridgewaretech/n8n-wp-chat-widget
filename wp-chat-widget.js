@@ -1,15 +1,20 @@
+/**
+ * Sarah AI WhatsApp Lead Widget
+ * Version: 2.1
+ * Includes: Success Message, Form Reset, and Terms Acceptance Record.
+ */
 (function() {
-    // --- Configuration (Defaults - Overridden by WordPress Config) ---
+    // --- 1. CONFIGURATION ---
     const defaultConfig = {
         whatsapp: {
             phoneNumber: '+61412345678',
-            prefilledMessage: 'Hi👋, This is Sarah, thank thank you for contacting Bridgeware Technologies. How can we help you today?',
+            prefilledMessage: 'Hi👋, This is Sarah...',
             n8nBackendUrl: 'https://myExample-n8n-instance/webhook/whatsapp-lead',
         },
         branding: {
             logo: 'https://example.com/sarah-bridgeware-image.png',
-            name: 'Sarah Brisdgeware',
-            welcomeText: '¡Hi! I am **[Sarah]**, Your visrtual assistant. Fill the form to chat with me.',
+            name: 'Sarah Bridgeware',
+            welcomeText: '¡Hi! I am **[Sarah]**, Your virtual assistant. Fill the form to chat with me.',
             poweredBy: {
                 text: 'Sarah AI is powered by BWT AI',
                 link: 'https://bwtai.ai/'
@@ -28,7 +33,7 @@
         }
     };
 
-    // Merge user config (from WordPress snippet) with defaults
+    // Merge custom config if exists
     const config = window.ChatWidgetConfig ? 
         {
             whatsapp: { ...defaultConfig.whatsapp, ...window.ChatWidgetConfig.whatsapp },
@@ -37,659 +42,223 @@
             links: { ...defaultConfig.links, ...window.ChatWidgetConfig.links }
         } : defaultConfig;
 
-    // Prevent multiple initializations
     if (window.N8NChatWidgetInitialized) return;
     window.N8NChatWidgetInitialized = true;
 
-    // --- Country Codes Data ---
+    // --- 2. COUNTRY CODES ---
     const countryCodes = [
         { name: 'Spain', code: 'ES', dial_code: '+34' },
         { name: 'United States', code: 'US', dial_code: '+1' },
+        { name: 'Australia', code: 'AU', dial_code: '+61' },
         { name: 'Mexico', code: 'MX', dial_code: '+52' },
         { name: 'Colombia', code: 'CO', dial_code: '+57' },
-        { name: 'Argentina', code: 'AR', dial_code: '+54' },
-        { name: 'Chile', code: 'CL', dial_code: '+56' },
-        { name: 'Peru', code: 'PE', dial_code: '+51' },
-        { name: 'Venezuela', code: 'VE', dial_code: '+58' },
-        { name: 'Ecuador', code: 'EC', dial_code: '+593' },
-        { name: 'Uruguay', code: 'UY', dial_code: '+598' },
-        { name: 'Paraguay', code: 'PY', dial_code: '+595' },
-        { name: 'Bolivia', code: 'BO', dial_code: '+591' },
-        { name: 'Brazil', code: 'BR', dial_code: '+55' },
-        { name: 'Australia', code: 'AU', dial_code: '+61' },
+        { name: 'Argentina', code: 'AR', dial_code: '+54' }
     ].sort((a, b) => a.name.localeCompare(b.name));
     
-    // Default selected code (e.g., Australia or the first one)
     const defaultCountryCode = countryCodes.find(c => c.code === 'AU') || countryCodes[0]; 
 
-    // --- Custom Styles for Form/Modal View ---
+    // --- 3. CSS STYLES ---
     const styles = `
         .n8n-chat-widget {
-            --chat--color-primary: var(--n8n-chat-primary-color, ${config.style.primaryColor}); 
-            --chat--color-secondary: var(--n8n-chat-secondary-color, ${config.style.secondaryColor}); 
-            --chat--color-background: var(--n8n-chat-background-color, #f4f6f8);
-            --chat--color-font: var(--n8n-chat-font-color, #333333);
-            /* Input colors */
+            --chat--color-primary: ${config.style.primaryColor}; 
+            --chat--color-secondary: ${config.style.secondaryColor}; 
+            --chat--color-background: ${config.style.backgroundColor};
+            --chat--color-font: ${config.style.fontColor};
             --chat--color-input-bg: #1c274b;
             --chat--color-input-font: #ffffff;
-            font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: 'Geist Sans', sans-serif;
         }
 
-        /* Full screen overlay (modal background) */
         .n8n-chat-widget .chat-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1001;
-            display: none;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+            z-index: 1001; display: none; justify-content: center; align-items: center;
         }
-        .n8n-chat-widget .chat-overlay.open {
-            display: flex;
-        }
+        .n8n-chat-widget .chat-overlay.open { display: flex; }
         
-        /* Main Modal Container */
         .n8n-chat-widget .chat-container {
-            position: relative;
-            bottom: auto;
-            right: auto;
-            z-index: 1002;
-            display: none;
-            width: 90%;
-            max-width: 700px;
-            height: auto;
-            max-height: 90vh;
-            background: var(--chat--color-background);
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            border: none;
-            overflow: hidden;
-            font-family: inherit;
+            position: relative; z-index: 1002; display: none;
+            width: 90%; max-width: 700px; height: 600px;
+            background: var(--chat--color-background); border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); overflow: hidden;
         }
+        .n8n-chat-widget .chat-container.open { display: flex; }
         
-        @media (min-width: 601px) {
-            .n8n-chat-widget .chat-container {
-                width: 700px;
-                height: 600px; 
-                max-height: 90vh;
-            }
-        }
-        
-        @media (max-width: 600px) {
-             .n8n-chat-widget .chat-container {
-                 width: 95vw;
-                 height: auto;
-                 max-height: 90vh;
-                 border-radius: 8px;
-            }
-        }
-        
-        .n8n-chat-widget .chat-container.open {
-            display: flex;
-            flex-direction: row;
-        }
-        
-        /* Image Sidebar (Agent Photo) */
         .n8n-chat-widget .image-sidebar {
-            flex: 0 0 45%;
-            background-image: url('${config.branding.logo}');
-            background-size: cover;
-            background-position: center center;
-            border-top-left-radius: 12px;
-            border-bottom-left-radius: 12px;
+            flex: 0 0 45%; background-image: url('${config.branding.logo}');
+            background-size: cover; background-position: center;
         }
         
-        @media (max-width: 600px) {
-            .n8n-chat-widget .image-sidebar {
-                display: none;
-            }
-            .n8n-chat-widget .form-content-area {
-                flex: 1 1 100%;
-            }
-        }
-
-        /* Form Content Area: IMPORTANT - height: 100% added to ensure flex pinning works */
         .n8n-chat-widget .form-content-area {
-            flex: 1 1 55%;
-            padding: 30px; 
-            background: white;
-            border-radius: 12px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; 
-            height: 100%; 
-            box-sizing: border-box; 
-        }
-
-        /* Wrapper for scrolling content */
-        .n8n-chat-widget .form-scroll-content {
-            overflow-y: hidden; 
-            margin-right: 0; 
-            padding-right: 0;
-            margin-bottom: 16px; 
-            padding-bottom: 0; 
-        }
-        
-        /* Close Button (Top Right of Form) */
-        .n8n-chat-widget .close-button {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            transform: none;
-            background: none;
-            border: none;
-            color: var(--chat--color-font);
-            cursor: pointer;
-            padding: 5px;
-            font-size: 24px;
-            opacity: 0.6;
-            z-index: 10; 
-        }
-
-        /* Header Text Styling */
-        .n8n-chat-widget .welcome-text {
-            font-size: 18px; 
-            font-weight: 500;
-            color: var(--chat--color-font);
-            margin-bottom: 24px;
-            line-height: 1.4;
-            text-align: left;
-            margin-right: 30px; 
-        }
-        .n8n-chat-widget .welcome-text strong {
-            font-weight: 700;
-        }
-        
-        /* Input Field Spacing FIX */
-        .n8n-chat-widget .input-group {
-            margin-bottom: 14px; 
-            position: relative;
+            flex: 1; padding: 30px; background: white;
+            display: flex; flex-direction: column; position: relative;
         }
 
         .n8n-chat-widget .form-input {
-            width: 100%;
-            padding: 15px 18px; 
-            border: 1px solid var(--chat--color-input-bg);
-            border-radius: 8px; 
-            font-size: 16px;
-            color: var(--chat--color-input-font); 
-            background: var(--chat--color-input-bg); 
-            transition: border-color 0.2s, box-shadow 0.2s;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-        .n8n-chat-widget .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.7); 
-            opacity: 1; 
-        }
-        .n8n-chat-widget .form-input:focus {
-            outline: none;
-            border-color: var(--chat--color-primary);
-            box-shadow: 0 0 0 1px var(--chat--color-primary);
+            width: 100%; padding: 12px; margin-bottom: 10px;
+            border-radius: 8px; border: 1px solid var(--chat--color-input-bg);
+            background: var(--chat--color-input-bg); color: white;
         }
 
-        /* Phone Input Group */
-        .n8n-chat-widget .phone-input-group {
-            display: flex;
-            gap: 10px; 
-        }
-        .n8n-chat-widget .country-code-select {
-            flex: 0 0 90px; 
-            padding: 15px 5px; 
-            border: 1px solid var(--chat--color-input-bg);
-            border-radius: 8px;
-            font-size: 16px;
-            color: var(--chat--color-input-font); 
-            background: var(--chat--color-input-bg); 
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2064.9c-2.8-2.8-6.9-4.7-11.9-5.1H17.3c-5%200.4-9.1%202.3-11.9%205.1-5.7%205.7-5.7%2014.9%200%2020.6l130.6%20130.6c2.8%202.8%206.9%204.7%2011.9%205.1%205-0.4%209.1-2.3%2011.9-5.1L287%2085.5c5.7-5.7%205.7-14.9%200-20.6z%22%2F%3E%3C%2Fsvg%3E"); 
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 10px;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            cursor: pointer;
+        .n8n-chat-widget .phone-input-group { display: flex; gap: 8px; }
+        .n8n-chat-widget .country-code-select { 
+            width: 80px; background: var(--chat--color-input-bg); color: white; border-radius: 8px;
         }
 
-        .n8n-chat-widget .phone-number-input {
-            flex: 1;
-        }
-        
-        /* Checkbox and Terms Spacing FIX */
-        .n8n-chat-widget .terms-checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            margin-top: 5px; 
-            margin-bottom: 16px; 
-            font-size: 13px; 
-            line-height: 1.2; 
-            color: var(--chat--color-font); 
-        }
-        .n8n-chat-widget .terms-checkbox-group label {
-             padding-top: 2px;
-             flex: 1; 
-        }
-
-        .n8n-chat-widget .terms-checkbox-group input[type="checkbox"] {
-            margin-top: 2px;
-            margin-right: 10px;
-            min-width: 16px;
-            min-height: 16px;
-            border-radius: 3px;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            flex-shrink: 0; 
-        }
-
-        .n8n-chat-widget .terms-checkbox-group a {
-            color: var(--chat--color-primary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: opacity 0.2s;
-        }
-        .n8n-chat-widget .terms-checkbox-group a:hover {
-            opacity: 0.8;
-        }
-        
-        /* Start Conversation Button (Modal Button) */
         .n8n-chat-widget .whatsapp-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 15px 24px;
-            background: #f1f1f1; 
-            color: #888888; 
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background 0.3s ease, transform 0.1s ease;
-            font-family: inherit;
-            margin-top: 0; 
-            margin-bottom: 10px; 
+            width: 100%; padding: 15px; border-radius: 8px; border: none;
+            background: var(--chat--color-primary); color: white; font-weight: bold; cursor: pointer;
         }
+        .n8n-chat-widget .whatsapp-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* Styling for ENABLED button */
-        .n8n-chat-widget .whatsapp-btn:not(:disabled) {
-            background: var(--chat--color-primary);
-            color: white;
-        }
-        
-        .n8n-chat-widget .action-area {
-            margin-top: auto; 
-        }
-
-        .n8n-chat-widget .whatsapp-btn:hover:not(:disabled) {
-            background: #008f1b;
-        }
-        
-        .n8n-chat-widget .whatsapp-btn:disabled {
-            cursor: not-allowed;
-        }
-
-        /* Footer Styling */
-        .n8n-chat-widget .chat-footer {
-            padding: 10px 0 0; 
-            text-align: center;
-            background: white;
-            border-top: 1px solid #f0f0f0;
-            font-size: 11px; 
-            white-space: normal; 
-            line-height: 1.2;
-            padding-top: 10px;
-        }
-        .n8n-chat-widget .chat-footer a {
-            color: var(--chat--color-secondary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .n8n-chat-widget .error-message {
-            color: red;
-            font-size: 13px;
-            margin-top: 10px;
-            margin-bottom: 10px; 
-            text-align: center;
-            display: none;
-        }
-        
-        /* --- Chat Toggle Button (Pill/Extended Bubble) --- */
         .n8n-chat-widget .chat-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: auto; 
-            padding: 12px 20px; 
-            height: 48px; 
-            border-radius: 24px !important; 
-            background: #25D366; 
-            color: white; 
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 999;
-            transition: transform 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px; 
-            font-weight: 600;
-            text-decoration: none;
-            gap: 10px; 
+            position: fixed; bottom: 20px; right: 20px;
+            padding: 12px 20px; border-radius: 24px; background: #25D366;
+            color: white; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px;
         }
 
-        .n8n-chat-widget .chat-toggle.position-left {
-            right: auto;
-            left: 20px;
-        }
-
-        .n8n-chat-widget .chat-toggle:hover {
-            transform: scale(1.05);
-            background: #1da851; 
-        }
-        
-        .n8n-chat-widget .chat-toggle svg {
-            width: 24px; 
-            height: 24px;
-            fill: white !important; 
-            flex-shrink: 0;
-            pointer-events: none; 
+        .n8n-chat-widget .close-button {
+            position: absolute; right: 15px; top: 15px; font-size: 24px;
+            background: none; border: none; cursor: pointer; z-index: 10;
         }
     `;
 
-    // Load Geist font
-    const fontLink = document.createElement('link');
-    fontLink.rel = 'stylesheet';
-    fontLink.href = 'https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/style.css';
-    document.head.appendChild(fontLink);
-
-    // Inject styles
     const styleSheet = document.createElement('style');
     styleSheet.textContent = styles;
     document.head.appendChild(styleSheet);
 
-
-    // Create widget container
-    const widgetContainer = document.createElement('div');
-    widgetContainer.className = 'n8n-chat-widget';
-    
-    // Set CSS variables for colors
-    widgetContainer.style.setProperty('--chat--color-primary', config.style.primaryColor);
-    widgetContainer.style.setProperty('--chat--color-secondary', config.style.secondaryColor);
-    widgetContainer.style.setProperty('--chat--color-background', config.style.backgroundColor);
-    widgetContainer.style.setProperty('--chat--color-font', config.style.fontColor);
-
-    // 1. Create Overlay
-    const chatOverlay = document.createElement('div');
-    chatOverlay.className = 'chat-overlay';
-
-    // 2. Create Chat Container (Modal)
-    const chatContainer = document.createElement('div');
-    chatContainer.className = 'chat-container';
-    
-    // 3. Image Sidebar (Agent Photo)
-    const imageSidebar = document.createElement('div');
-    imageSidebar.className = 'image-sidebar';
-    chatContainer.appendChild(imageSidebar);
-    
-    // 4. Form Content Area
-    const formContentArea = document.createElement('div');
-    formContentArea.className = 'form-content-area';
-    
-    // Welcome text with agent name substitution
-    const welcomeText = config.branding.welcomeText.replace('[Agent Name]', config.branding.name);
-    
-    // Create Scrollable Content Wrapper
-    const formScrollContent = document.createElement('div');
-    formScrollContent.className = 'form-scroll-content';
-
-    formScrollContent.innerHTML = `
-        <p class="welcome-text">${welcomeText}</p>
-
-        <div class="input-group">
-            <input type="text" id="nombre" class="form-input" placeholder="Name" required />
+    // --- 4. DOM CONSTRUCTION ---
+    const widget = document.createElement('div');
+    widget.className = 'n8n-chat-widget';
+    widget.innerHTML = `
+        <div class="chat-overlay">
+            <div class="chat-container">
+                <div class="image-sidebar"></div>
+                <div class="form-content-area">
+                    <button class="close-button">&times;</button>
+                    <div class="form-scroll-content">
+                        <p><strong>${config.branding.welcomeText.replace('[Sarah]', config.branding.name)}</strong></p>
+                        <input type="text" id="nombre" class="form-input" placeholder="First Name">
+                        <input type="text" id="apellido" class="form-input" placeholder="Last Name">
+                        <div class="phone-input-group">
+                            <select id="country-code" class="form-input country-code-select"></select>
+                            <input type="tel" id="telefono" class="form-input" placeholder="Phone Number">
+                        </div>
+                        <input type="email" id="correo" class="form-input" placeholder="Email Address">
+                        <div style="font-size: 12px; margin-bottom: 15px;">
+                            <input type="checkbox" id="terms-accepted"> 
+                            I accept the <a href="${config.links.serviceAgreement}">Terms</a> and <a href="${config.links.privacyPolicy}">Privacy Policy</a>.
+                        </div>
+                    </div>
+                    <div class="action-area">
+                        <button class="whatsapp-btn" disabled>Start Conversation</button>
+                        <p id="form-error" style="color:red; display:none; font-size:12px;"></p>
+                    </div>
+                    <div class="chat-footer" style="text-align:center; margin-top:10px; font-size:10px;">
+                        <a href="${config.branding.poweredBy.link}">${config.branding.poweredBy.text}</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="input-group">
-            <input type="text" id="apellido" class="form-input" placeholder="LastName" required />
-        </div>
-        
-        <div class="input-group phone-input-group">
-            <select id="country-code" class="country-code-select"></select>
-            <input type="tel" id="telefono" class="form-input phone-number-input" placeholder="Phone" required />
-        </div>
-        
-        <div class="input-group">
-            <input type="email" id="correo-corporativo" class="form-input" placeholder="Email" required />
-        </div>
-
-        <div class="terms-checkbox-group">
-            <input type="checkbox" id="terms-accepted" required />
-            <label for="terms-accepted">
-                I've read and accept the <a href="${config.links.serviceAgreement}" target="_blank">Terms and Conditions</a> and the <a href="${config.links.privacyPolicy}" target="_blank">Privacy Policy</a>
-            </label>
-        </div>
-    `;
-
-    // Create Button and Error Message wrapper (Action Area)
-    const actionArea = document.createElement('div');
-    actionArea.className = 'action-area';
-    actionArea.innerHTML = `
-        <button class="whatsapp-btn" type="button" disabled>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
-            </svg>
-            Start Conversation
+        <button class="chat-toggle">
+            <span>Hi!</span>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" /></svg>
         </button>
-        <div class="error-message" id="form-error"></div>
     `;
+    document.body.appendChild(widget);
 
-    // Create Close Button
-    const closeButton = document.createElement('button');
-    closeButton.className = 'close-button';
-    closeButton.title = 'Close';
-    closeButton.innerHTML = '×';
-    
-    // Footer
-	const footer = document.createElement('div');
-	footer.className = 'chat-footer';
-	footer.innerHTML = `
-		<a href="${config.branding.poweredBy.link}" target="_blank" rel="noopener noreferrer">
-			${config.branding.poweredBy.text}
-		</a>
-	`;
+    // --- 5. LOGIC & EVENT HANDLERS ---
+    const overlay = widget.querySelector('.chat-overlay');
+    const container = widget.querySelector('.chat-container');
+    const toggle = widget.querySelector('.chat-toggle');
+    const closeBtn = widget.querySelector('.close-button');
+    const submitBtn = widget.querySelector('.whatsapp-btn');
+    const scrollContent = widget.querySelector('.form-scroll-content');
+    const actionArea = widget.querySelector('.action-area');
+    const countrySelect = widget.querySelector('#country-code');
 
-    // Assemble form content area
-    formContentArea.appendChild(closeButton);
-    formContentArea.appendChild(formScrollContent);
-    formContentArea.appendChild(actionArea); 
-    formContentArea.appendChild(footer);     
-    
-    chatContainer.appendChild(formContentArea);
-    chatOverlay.appendChild(chatContainer);
-    widgetContainer.appendChild(chatOverlay);
-
-    
-    // Create chat toggle button 
-    const chatToggle = document.createElement('button');
-    chatToggle.className = `chat-toggle${config.style.position === 'left' ? ' position-left' : ''}`;
-    chatToggle.title = 'Chat With Us';
-    
-    // **Combined Text and SVG for Pill Look**
-    chatToggle.innerHTML = `
-        <span>Hi!</span>
-        <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.039 2.007c-5.518 0-9.998 4.48-9.998 9.997 0 1.708.435 3.327 1.258 4.757L2.001 22l5.441-1.472a9.986 9.986 0 0 0 4.597.981h.001c5.517 0 9.997-4.48 9.997-9.997S17.557 2.007 12.039 2.007zm5.556 12.06c-.198.547-1.168 1.054-1.583 1.054-.415 0-.901-.157-1.397-.568-.495-.412-1.854-.925-2.269-.925-.415 0-.537.311-.735.547-.198.236-.396.471-.595.707-.198.236-.396.471-.791.471-.396 0-1.529-.569-2.285-1.405-.754-.837-1.254-1.866-1.405-2.102-.158-.236 0-.368.125-.494.124-.125.269-.296.396-.441.125-.146.166-.236.249-.393.083-.158.042-.296-.021-.439-.063-.146-.595-1.433-.811-1.966-.215-.533-.431-.458-.595-.458-.146 0-.311-.021-.475-.021-.165 0-.431.021-.667.237-.235.216-.901.882-.901 2.158 0 1.275.922 2.5 1.053 2.684.131.185 1.831 2.809 4.45 3.935 2.618 1.126 2.618.751 3.165.751.546 0 1.78-.654 2.008-1.291.229-.638.229-.982.166-1.096-.062-.112-.198-.171-.414-.283z" />
-        </svg>
-    `;
-    widgetContainer.appendChild(chatToggle);
-
-    // Append widget to body
-    document.body.appendChild(widgetContainer);
-
-    // --- Elements references ---
-    const openBtn = chatToggle;
-    const closeBtn = closeButton; 
-    const whatsappBtn = actionArea.querySelector('.whatsapp-btn');
-    const termsCheckbox = formScrollContent.querySelector('#terms-accepted');
-    const nameInput = formScrollContent.querySelector('#nombre');
-    const lastNameInput = formScrollContent.querySelector('#apellido');
-    const phoneInput = formScrollContent.querySelector('#telefono');
-    const emailInput = formScrollContent.querySelector('#correo-corporativo');
-    const countryCodeSelect = formScrollContent.querySelector('#country-code');
-    const errorEl = actionArea.querySelector('#form-error');
-
-    // --- Initialization and Utility ---
-    
-    // Populate Country Code Dropdown
-    countryCodes.forEach(country => {
-        const option = document.createElement('option');
-        option.value = country.dial_code;
-        option.textContent = country.dial_code;
-        if (country.dial_code === defaultCountryCode.dial_code) {
-             option.selected = true;
-        }
-        countryCodeSelect.appendChild(option);
+    // Fill Country Codes
+    countryCodes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.dial_code;
+        opt.textContent = c.dial_code;
+        if(c.dial_code === defaultCountryCode.dial_code) opt.selected = true;
+        countrySelect.appendChild(opt);
     });
-    
-    // Function to check if the email format is basically valid
-    function isEmailValid(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
+
+    /**
+     * Toggles modal visibility
+     */
+    function toggleModal(show) {
+        overlay.classList.toggle('open', show);
+        container.classList.toggle('open', show);
+        toggle.style.display = show ? 'none' : 'flex';
     }
 
-    // --- Handlers ---
-    
-    function showModal() {
-        chatOverlay.classList.add('open');
-        chatContainer.classList.add('open');
-        openBtn.style.display = 'none';
-        errorEl.style.display = 'none';
+    /**
+     * Validates inputs to enable the submit button
+     */
+    function validate() {
+        const isFilled = widget.querySelector('#nombre').value.trim() && 
+                         widget.querySelector('#apellido').value.trim() &&
+                         widget.querySelector('#telefono').value.trim() &&
+                         widget.querySelector('#correo').value.trim() &&
+                         widget.querySelector('#terms-accepted').checked;
+        submitBtn.disabled = !isFilled;
     }
 
-    function closeModal() {
-        chatOverlay.classList.remove('open');
-        chatContainer.classList.remove('open');
-        openBtn.style.display = 'flex';
-    }
+    /**
+     * Sends data to n8n and shows success message
+     */
+    async function sendToWebhook() {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Connecting...';
 
-    function updateButtonState() {
-        const name = nameInput.value.trim();
-        const lastName = lastNameInput.value.trim();
-        const phone = phoneInput.value.trim();
-        const email = emailInput.value.trim();
-        
-        // 1. Check basic mandatory fields
-        const isNameValid = name.length > 0;
-        const isLastNameValid = lastName.length > 0;
-        const isTermsChecked = termsCheckbox.checked;
-        
-        // 2. Check Phone Number: minimum 7 digits and ONLY digits (stricter E.164 compliance)
-        // If your phones require more digits (e.g., 9), increase this number!
-        const minPhoneLength = 7; 
-        const isPhoneFormatValid = phone.length >= minPhoneLength && /^\d+$/.test(phone); // L340
-        
-        // 3. Check Email: required and valid format
-        const isEmailFormatValid = isEmailValid(email);
+        const payload = {
+            firstName: widget.querySelector('#nombre').value,
+            lastName: widget.querySelector('#apellido').value,
+            phone: countrySelect.value + widget.querySelector('#telefono').value,
+            email: widget.querySelector('#correo').value,
+            termsAccepted: widget.querySelector('#terms-accepted').checked, // RECORD ADDED HERE
+            source: window.location.href
+        };
 
-        if (isNameValid && isLastNameValid && isPhoneFormatValid && isEmailFormatValid && isTermsChecked) {
-            whatsappBtn.removeAttribute('disabled');
-        } else {
-            whatsappBtn.setAttribute('disabled', 'true');
+        try {
+            const res = await fetch(config.whatsapp.n8nBackendUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                // SUCCESS STATE
+                scrollContent.innerHTML = `
+                    <div style="text-align:center; padding: 40px 10px;">
+                        <div style="font-size: 50px; color: #25D366;">✓</div>
+                        <h3>Success!</h3>
+                        <p>Thank you, <b>${payload.firstName}</b>. I will get in touch with you on WhatsApp very soon!</p>
+                    </div>
+                `;
+                actionArea.style.display = 'none';
+                setTimeout(() => {
+                    location.reload(); // Resets form for next time
+                }, 6000);
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            const err = widget.querySelector('#form-error');
+            err.textContent = "Error sending message. Try again.";
+            err.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Start Conversation';
         }
     }
 
-	async function handleWhatsAppStart(e) {
-		e.preventDefault();
-		
-		// 1. Gather Data
-		const name = nameInput.value.trim();
-		const lastName = lastNameInput.value.trim();
-		const phone = phoneInput.value.trim();
-		const email = emailInput.value.trim();
-		const countryCode = countryCodeSelect.value;
-		const fullPhoneNumber = (countryCode + phone).replace('+', ''); 
-
-		// 2. UI Loading State
-		whatsappBtn.setAttribute('disabled', 'true');
-		whatsappBtn.innerHTML = `Sending...`; 
-
-		try {
-			// 3. Send to n8n
-			const response = await fetch(config.whatsapp.n8nBackendUrl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					firstName: name,
-					lastName: lastName,
-					phone: fullPhoneNumber,
-					email: email,
-					source: 'Website Chat Form'
-				})
-			});
-
-			if (response.ok) {
-				// 4. CLEAR FORM & SHOW SUCCESS MESSAGE
-				// We replace the scrollable content with a nice confirmation
-				formScrollContent.innerHTML = `
-					<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px;">
-						<div style="background: #dcf8c6; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-							<svg viewBox="0 0 24 24" width="30" height="30" fill="#25D366"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-						</div>
-						<h2 style="color: var(--chat--color-primary); margin-bottom: 10px;">Perfect!</h2>
-						<p style="font-size: 16px; color: #555; line-height: 1.5;">
-							Thank you, <strong>${name}</strong>. <br>
-							I've received your details and I am reaching out to your WhatsApp right now!
-						</p>
-					</div>
-				`;
-				
-				// Hide the button area and footer since the process is done
-				actionArea.style.display = 'none';
-				footer.style.opacity = '0.5';
-
-				// 5. AUTO-CLOSE (Optional)
-				// Closes the modal automatically after 6 seconds
-				setTimeout(closeModal, 6000); 
-				
-			} else {
-				throw new Error('Webhook failed');
-			}
-		} catch (err) {
-			console.error('Submission error:', err);
-			errorEl.textContent = "Oops! Something went wrong. Please try again.";
-			errorEl.style.display = 'block';
-			whatsappBtn.removeAttribute('disabled');
-			whatsappBtn.innerHTML = `Start Conversation`;
-		}
-	}
-
-
-    // --- Event listeners ---
-    openBtn.addEventListener('click', showModal);
-    closeBtn.addEventListener('click', closeModal);
-    whatsappBtn.addEventListener('click', handleWhatsAppStart);
-
-    // Input listeners to enable/disable button
-    [nameInput, lastNameInput, phoneInput, emailInput, termsCheckbox].forEach(el => {
-        el.addEventListener('input', updateButtonState);
-    });
-
-    // Initial state check
-    updateButtonState();
-
-    // Start with modal closed and toggle button visible
-    openBtn.style.display = 'flex';
-    chatContainer.classList.remove('open');
-    chatOverlay.classList.remove('open');
+    // Listeners
+    toggle.onclick = () => toggleModal(true);
+    closeBtn.onclick = () => toggleModal(false);
+    submitBtn.onclick = sendToWebhook;
+    widget.querySelectorAll('input').forEach(i => i.oninput = validate);
 
 })();
