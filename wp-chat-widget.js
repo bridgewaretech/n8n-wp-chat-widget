@@ -608,53 +608,70 @@
         }
     }
 
-    async function handleWhatsAppStart(e) {
-        e.preventDefault();
-        
-        const name = nameInput.value.trim();
-        const lastName = lastNameInput.value.trim();
-        const phone = phoneInput.value.trim();
-        const email = emailInput.value.trim();
-        const countryCode = countryCodeSelect.value;
-        const fullPhoneNumber = countryCode + phone;
-        
-        // Re-check validation just in case the button was manually enabled
-        updateButtonState(); 
-        if (whatsappBtn.disabled) {
-             errorEl.textContent = "Please fill in all mandatory fields correctly.";
-             errorEl.style.display = 'block';
-             return;
-        }
-        
-        // 1. Send data to n8n backend for lead logging
-        // We use the URL provided in the WordPress config (config.whatsapp.n8nBackendUrl)
-        try {
-            await fetch(config.whatsapp.n8nBackendUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    firstName: name,
-                    lastName: lastName,
-                    phone: fullPhoneNumber,
-                    email: email,
-                    source: 'Website Chat Form'
-                })
-            });
-            // We ignore errors here so the user can still start the chat if the backend logging fails
-        } catch (err) {
-            console.error('Error logging lead to n8n:', err);
-        }
-        
-        // 2. Redirect to WhatsApp
-        // We use the WhatsApp number provided in the WordPress config (config.whatsapp.phoneNumber)
-        const whatsappUrl = `https://wa.me/${config.whatsapp.phoneNumber.replace('+', '')}?text=${encodeURIComponent(config.whatsapp.prefilledMessage + ' - ' + name + ' ' + lastName + ' (' + fullPhoneNumber + ')')}`;
-        
-        // Open in a new tab/window
-        window.open(whatsappUrl, '_blank');
-        
-        // Close the modal after redirection
-        closeModal();
-    }
+	async function handleWhatsAppStart(e) {
+		e.preventDefault();
+		
+		// 1. Gather Data
+		const name = nameInput.value.trim();
+		const lastName = lastNameInput.value.trim();
+		const phone = phoneInput.value.trim();
+		const email = emailInput.value.trim();
+		const countryCode = countryCodeSelect.value;
+		const fullPhoneNumber = (countryCode + phone).replace('+', ''); 
+
+		// 2. UI Loading State
+		whatsappBtn.setAttribute('disabled', 'true');
+		whatsappBtn.innerHTML = `Sending...`; 
+
+		try {
+			// 3. Send to n8n
+			const response = await fetch(config.whatsapp.n8nBackendUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					firstName: name,
+					lastName: lastName,
+					phone: fullPhoneNumber,
+					email: email,
+					source: 'Website Chat Form'
+				})
+			});
+
+			if (response.ok) {
+				// 4. CLEAR FORM & SHOW SUCCESS MESSAGE
+				// We replace the scrollable content with a nice confirmation
+				formScrollContent.innerHTML = `
+					<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px;">
+						<div style="background: #dcf8c6; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+							<svg viewBox="0 0 24 24" width="30" height="30" fill="#25D366"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+						</div>
+						<h2 style="color: var(--chat--color-primary); margin-bottom: 10px;">Perfect!</h2>
+						<p style="font-size: 16px; color: #555; line-height: 1.5;">
+							Thank you, <strong>${name}</strong>. <br>
+							I've received your details and I am reaching out to your WhatsApp right now!
+						</p>
+					</div>
+				`;
+				
+				// Hide the button area and footer since the process is done
+				actionArea.style.display = 'none';
+				footer.style.opacity = '0.5';
+
+				// 5. AUTO-CLOSE (Optional)
+				// Closes the modal automatically after 6 seconds
+				setTimeout(closeModal, 6000); 
+				
+			} else {
+				throw new Error('Webhook failed');
+			}
+		} catch (err) {
+			console.error('Submission error:', err);
+			errorEl.textContent = "Oops! Something went wrong. Please try again.";
+			errorEl.style.display = 'block';
+			whatsappBtn.removeAttribute('disabled');
+			whatsappBtn.innerHTML = `Start Conversation`;
+		}
+	}
 
 
     // --- Event listeners ---
