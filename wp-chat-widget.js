@@ -1,11 +1,11 @@
 /**
  * Bridgy AI WhatsApp Lead Widget
- * Version: 2.3
+ * Version: 2.4
  * * CHANGES:
- * - Header text color darkened for better readability.
- * - Close "X" replaced with a high-visibility UX button.
- * - Fixed hover issues on the main action button.
- * - Retains success message and terms acceptance logic.
+ * - PERMANENT FIX: Hover button disappearance issue resolved.
+ * - NEW: Added WhatsApp icon inside the main CTA button.
+ * - Darkened header text for premium readability.
+ * - UX Close Button with hover effects.
  */
 (function() {
     // --- 1. CONFIGURATION ---
@@ -28,7 +28,7 @@
             primaryColor: '#1c274b', // Navy Blue
             accentColor: '#25D366',  // WhatsApp Green
             backgroundColor: '#ffffff',
-            headerTextColor: '#1c274b' // Darkened for readability
+            headerTextColor: '#1c274b'
         },
         links: {
             serviceAgreement: '#',
@@ -36,7 +36,6 @@
         }
     };
 
-    // Merge custom global config if it exists on the window object
     const config = window.ChatWidgetConfig ? 
         {
             whatsapp: { ...defaultConfig.whatsapp, ...window.ChatWidgetConfig.whatsapp },
@@ -63,11 +62,11 @@
     const styles = `
         .n8n-chat-widget {
             --chat-navy: #1c274b;
+            --chat-green: #25D366;
             --chat-bg-input: #e8f0fe;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Overlay Background */
         .n8n-chat-widget .chat-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6); z-index: 1001; display: none; 
@@ -75,49 +74,48 @@
         }
         .n8n-chat-widget .chat-overlay.open { display: flex; }
         
-        /* Main Modal Container */
         .n8n-chat-widget .chat-container {
             display: flex; width: 95%; max-width: 850px; height: 600px;
             background: white; border-radius: 20px; overflow: hidden; position: relative;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
         
-        /* Left Image Panel */
         .n8n-chat-widget .image-sidebar {
             flex: 0 0 45%; background-image: url('${config.branding.logo}');
             background-size: cover; background-position: center;
         }
         
-        /* Right Form Panel */
         .n8n-chat-widget .form-content-area {
             flex: 1; padding: 40px; display: flex; flex-direction: column; position: relative;
         }
 
-        /* Darkened Header Text */
         .n8n-chat-widget .welcome-header {
             font-size: 22px; color: ${config.style.headerTextColor}; 
-            margin-bottom: 25px; line-height: 1.4; font-weight: 600;
+            margin-bottom: 25px; line-height: 1.4; font-weight: 700;
         }
 
-        /* Form Inputs */
         .n8n-chat-widget .form-input {
             width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px;
-            border: none; background: var(--chat-bg-input); color: #333; font-size: 16px; box-sizing: border-box;
+            border: 2px solid transparent; background: var(--chat-bg-input); color: #333; font-size: 16px; box-sizing: border-box;
         }
+        .n8n-chat-widget .form-input:focus { border-color: var(--chat-navy); outline: none; }
 
         .n8n-chat-widget .phone-input-group { display: flex; gap: 10px; margin-bottom: 12px; }
         .n8n-chat-widget .country-code-select { width: 90px; cursor: pointer; }
 
-        /* Main CTA Button */
+        /* FIXED BUTTON STYLES */
         .n8n-chat-widget .whatsapp-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
             width: 100%; padding: 16px; border-radius: 12px; border: none;
-            background: var(--chat-navy); color: white; font-size: 16px; font-weight: bold; cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s; margin-top: 10px;
+            background-color: var(--chat-navy) !important; color: white !important; 
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: transform 0.1s ease, background-color 0.2s ease; 
+            margin-top: 10px; visibility: visible !important; opacity: 1 !important;
         }
+        .n8n-chat-widget .whatsapp-btn:hover:not(:disabled) { background-color: #2a3a6d !important; }
         .n8n-chat-widget .whatsapp-btn:active { transform: scale(0.98); }
-        .n8n-chat-widget .whatsapp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .n8n-chat-widget .whatsapp-btn:disabled { opacity: 0.6 !important; cursor: not-allowed; background-color: #666 !important; }
 
-        /* NEW: Improved Close Button */
         .n8n-chat-widget .ux-close-btn {
             position: absolute; right: 20px; top: 20px; padding: 8px 15px;
             background: #f0f0f0; border: none; border-radius: 8px; color: #666;
@@ -126,10 +124,9 @@
         }
         .n8n-chat-widget .ux-close-btn:hover { background: #ff4d4d; color: white; }
 
-        /* Floating Toggle Button */
         .n8n-chat-widget .chat-toggle {
             position: fixed; bottom: 30px; right: 30px;
-            padding: 15px 25px; border-radius: 50px; background: ${config.style.accentColor};
+            padding: 15px 25px; border-radius: 50px; background: var(--chat-green);
             color: white; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2); font-weight: bold; font-size: 16px;
         }
@@ -150,9 +147,7 @@
             <div class="chat-container">
                 <div class="image-sidebar"></div>
                 <div class="form-content-area">
-                    <button class="ux-close-btn">
-                        <span>&times;</span> Close
-                    </button>
+                    <button class="ux-close-btn"><span>&times;</span> Close</button>
 
                     <div class="form-scroll-content">
                         <div class="welcome-header">
@@ -171,13 +166,11 @@
                         </div>
                     </div>
                     <div class="action-area">
-                        <button class="whatsapp-btn" id="submit-btn" disabled>Start Conversation</button>
+                        <button class="whatsapp-btn" id="submit-btn" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 2.004c-5.513 0-9.989 4.477-9.989 9.991 0 1.763.459 3.42 1.263 4.86L2 22l5.289-1.388a9.948 9.948 0 004.742 1.196h.001c5.513 0 9.99-4.478 9.99-9.992 0-5.514-4.477-9.992-9.991-9.992zM17.6 15.65c-.244.686-1.439 1.32-1.95 1.32-.51 0-1.11-.194-1.72-.714-.61-.519-2.28-1.166-2.79-1.166-.51 0-.66.393-.91.686-.244.296-.487.593-.732.889-.244.296-.488.592-.976.592-.487 0-1.88-.716-2.81-1.77-.93-.1-1.54-2.35-1.73-2.646-.194-.296 0-.46.15-.62.15-.16.33-.37.49-.55.15-.18.2-.3.3-.49.1-.2.05-.37-.02-.55-.08-.18-.73-1.76-1-2.42-.26-.66-.53-.57-.73-.57-.18 0-.38-.03-.58-.03-.2 0-.53.03-.82.3-.29.27-1.11 1.1-1.11 2.7 0 1.59 1.14 3.12 1.3 3.35.16.23 2.25 3.52 5.46 4.93 3.21 1.41 3.21.94 3.88.94.67 0 2.18-.82 2.46-1.62.28-.79.28-1.23.2-1.37-.08-.14-.24-.22-.51-.36z"/></svg>
+                            Start Conversation
+                        </button>
                         <p id="form-error" style="color:#d32f2f; display:none; font-size:12px; text-align:center; margin-top:8px; font-weight:bold;"></p>
-                    </div>
-                    <div style="text-align:center; margin-top:auto; padding-top:15px; font-size:11px;">
-                        <a href="${config.branding.poweredBy.link}" target="_blank" style="color:#00bcd4; text-decoration:none; font-weight:600;">
-                            ${config.branding.poweredBy.text}
-                        </a>
                     </div>
                 </div>
             </div>
@@ -198,7 +191,6 @@
     const actionArea = widget.querySelector('.action-area');
     const countrySelect = widget.querySelector('#country-code');
 
-    // Populate Country Codes
     countryCodes.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.dial_code;
@@ -212,7 +204,6 @@
         toggle.style.display = show ? 'none' : 'flex';
     }
 
-    /** Validate all fields + terms checkbox */
     function validate() {
         const isFilled = widget.querySelector('#nombre').value.trim() && 
                          widget.querySelector('#apellido').value.trim() &&
@@ -222,17 +213,16 @@
         submitBtn.disabled = !isFilled;
     }
 
-    /** Main Submit Function */
     async function sendToWebhook() {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Connecting...';
+        submitBtn.innerHTML = 'Connecting...';
 
         const payload = {
             firstName: widget.querySelector('#nombre').value,
             lastName: widget.querySelector('#apellido').value,
             phone: countrySelect.value + widget.querySelector('#telefono').value,
             email: widget.querySelector('#correo').value,
-            termsAccepted: true, // Record acceptance in lead data
+            termsAccepted: true,
             source: window.location.hostname
         };
 
@@ -244,7 +234,6 @@
             });
 
             if (res.ok) {
-                // SUCCESS STATE
                 scrollContent.innerHTML = `
                     <div style="text-align:center; padding: 60px 20px;">
                         <div style="font-size: 70px; color: #25D366; margin-bottom: 20px;">✓</div>
@@ -255,21 +244,19 @@
                     </div>
                 `;
                 actionArea.style.display = 'none';
-                // Close and refresh after a delay to reset form
                 setTimeout(() => { toggleModal(false); location.reload(); }, 6000);
             } else {
                 throw new Error();
             }
         } catch (e) {
             const err = widget.querySelector('#form-error');
-            err.textContent = "Unable to connect. Please check your connection.";
+            err.textContent = "Unable to connect. Please try again.";
             err.style.display = 'block';
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Start Conversation';
+            submitBtn.innerHTML = 'Start Conversation';
         }
     }
 
-    // Attach Event Listeners
     toggle.onclick = () => toggleModal(true);
     closeBtn.onclick = () => toggleModal(false);
     submitBtn.onclick = sendToWebhook;
